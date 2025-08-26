@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +21,8 @@
             background-color: #F8FAFC;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
         }
         
         .sidebar {
@@ -68,15 +69,25 @@
             margin-left: 250px;
             padding: 30px;
             width: calc(100% - 250px);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* 关键修改：使整个主内容区域可滚动 */
         }
         
         .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            background: #F8FAFC;
+            z-index: 100;
+            padding-top: 10px;
+            padding-bottom: 15px;
         }
         
         .header-title {
@@ -108,93 +119,140 @@
             box-shadow: 0 5px 15px rgba(34, 45, 96, 0.2);
         }
         
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 20px;
         }
         
-        .btn-outline-primary:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .filter-section {
+        .search-section {
             background-color: white;
             border-radius: 12px;
             padding: 20px;
             box-shadow: var(--card-shadow);
-            margin-bottom: 30px;
+            position: sticky;
+            top: 80px; /* 在标题下方固定位置 */
+            z-index: 90;
         }
         
-        .form-select, .form-control {
-            border: 1px solid #e1e5eb;
-            border-radius: 8px;
-            padding: 10px 15px;
-            height: 46px;
-            transition: all 0.3s;
+        .search-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
         
-        .form-select:focus, .form-control:focus {
-            border-color: var(--light-accent);
-            box-shadow: 0 0 0 3px rgba(90, 106, 191, 0.15);
+        .search-group {
+            display: flex;
+            flex-direction: column;
         }
         
-        .btn-outline-secondary {
-            border: 1px solid #e1e5eb;
-            border-radius: 8px;
-            height: 46px;
-            transition: all 0.3s;
+        .search-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--primary-color);
         }
         
-        .btn-outline-secondary:hover {
-            background: var(--light-gray);
-            border-color: #d1d9e6;
-        }
-        
-        .task-card {
+        .tasks-container {
             background: white;
             border-radius: 12px;
             box-shadow: var(--card-shadow);
-            margin-bottom: 20px;
-            transition: all 0.3s;
-            border-left: 4px solid var(--primary-color);
-            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
-        .task-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--hover-shadow);
-        }
-        
-        .task-card.high-priority {
-            border-left-color: #E74C3C;
-        }
-        
-        .task-card.medium-priority {
-            border-left-color: #F39C12;
-        }
-        
-        .task-card.low-priority {
-            border-left-color: #2ECC71;
-        }
-        
-        .task-card-header {
-            padding: 20px;
+        .tasks-header {
+            padding: 15px 20px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 180px; /* 在搜索栏下方固定位置 */
+            background: white;
+            z-index: 80;
         }
         
-        .task-title {
+        .tasks-title {
             font-size: 18px;
             font-weight: 600;
             color: var(--primary-color);
             margin: 0;
-            display: flex;
-            align-items: center;
         }
         
-        .task-title i {
-            margin-right: 10px;
-            color: var(--light-accent);
+        .tasks-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tasks-table th {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .tasks-table th:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tasks-table th i {
+            margin-left: 5px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .tasks-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .tasks-table tr {
+            transition: all 0.2s;
+        }
+        
+        .tasks-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tasks-table tr.selected {
+            background-color: rgba(34, 45, 96, 0.05);
+        }
+        
+        .priority-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .priority-high {
+            background-color: #E74C3C;
+        }
+        
+        .priority-medium {
+            background-color: #F39C12;
+        }
+        
+        .priority-low {
+            background-color: #2ECC71;
+        }
+        
+        .priority-urgent {
+            background-color: #9B59B6;
         }
         
         .status-badge {
@@ -226,72 +284,148 @@
             color: #9B59B6;
         }
         
-        .task-card-body {
+        .task-detail-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .task-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .task-detail-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-detail-title i {
+            margin-right: 10px;
+            color: var(--light-accent);
+        }
+        
+        .task-detail-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .detail-section {
+            background: #f8f9fa;
+            border-radius: 10px;
             padding: 20px;
         }
         
-        .task-description {
-            color: #6c757d;
+        .detail-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
             margin-bottom: 15px;
-            line-height: 1.6;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
         
-        .task-meta {
+        .detail-item {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            width: 120px;
+            color: #6c757d;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .comments-section {
+            margin-top: 25px;
+        }
+        
+        .comments-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .comments-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        
+        .comment-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .comment-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 10px;
         }
         
-        .task-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+        .comment-author {
+            font-weight: 600;
+            color: var(--primary-color);
         }
         
-        .info-item {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
+        .comment-date {
+            font-size: 12px;
             color: #6c757d;
         }
         
-        .info-item i {
-            margin-right: 8px;
-            color: var(--light-accent);
-            font-size: 16px;
+        .comment-content {
+            line-height: 1.5;
         }
         
-        .task-actions .btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
+        .add-comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
-        .category-badge {
-            background: rgba(90, 106, 191, 0.1);
-            color: var(--light-accent);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+        .add-comment-form textarea {
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e1e5eb;
+            resize: none;
+            height: 100px;
         }
         
-        .category-product {
-            background: rgba(46, 204, 113, 0.1);
-            color: #2ECC71;
-        }
-        
-        .category-function {
-            background: rgba(155, 89, 182, 0.1);
-            color: #9B59B6;
+        .add-comment-form button {
+            align-self: flex-end;
         }
         
         .empty-state {
-            background: white;
-            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
             padding: 40px;
             text-align: center;
-            box-shadow: var(--card-shadow);
         }
         
         .empty-state i {
@@ -311,42 +445,38 @@
             margin: 0 auto 20px;
         }
         
-        .edit-icon {
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-left: 10px;
+        .sort-asc::after {
+            content: "↑";
+            margin-left: 5px;
         }
         
-        .edit-icon:hover {
-            color: var(--accent-color);
-            transform: scale(1.1);
+        .sort-desc::after {
+            content: "↓";
+            margin-left: 5px;
         }
         
-        .edit-form {
-            background: white;
+        .modal-content {
             border-radius: 12px;
-            padding: 25px;
-            box-shadow: var(--card-shadow);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
         
         .form-label {
             font-weight: 500;
             color: var(--primary-color);
-            margin-bottom: 8px;
-        }
-        
-        .form-section {
-            margin-bottom: 20px;
-        }
-        
-        .form-section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
         
         /* Responsive adjustments */
@@ -373,14 +503,12 @@
                 width: 100%;
             }
             
-            .task-meta {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
+            .task-detail-body {
+                grid-template-columns: 1fr;
             }
             
-            .task-actions {
-                align-self: flex-end;
+            .search-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -401,7 +529,7 @@
                         </a>
                     </li>
                     <li class="nav-item mt-5">
-                        <a class="nav-link" href="{{ url_for('logout') }}">
+                        <a class="nav-link" href="#">
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </a>
                     </li>
@@ -417,42 +545,173 @@
                     </button>
                 </div>
                 
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="all">All Statuses</option>
-                                <option value="todo">To Do</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="review">In Review</option>
-                                <option value="done">Done</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Assignee</label>
-                            <select class="form-select" id="assigneeFilter">
-                                <option value="all">All Assignees</option>
-                                <!-- Dynamically populated -->
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Project</label>
-                            <select class="form-select" id="projectFilter">
-                                <option value="all">All Projects</option>
-                                <!-- Dynamically populated -->
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-outline-secondary w-100" id="resetFilters">Reset Filters</button>
+                <div class="content-container">
+                    <!-- Search Section -->
+                    <div class="search-section">
+                        <div class="search-container">
+                            <div class="search-group">
+                                <label class="search-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="all">All Statuses</option>
+                                    <option value="todo">To Do</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="review">In Review</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Assignee</label>
+                                <select class="form-select" id="assigneeFilter">
+                                    <option value="all">All Assignees</option>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Project</label>
+                                <select class="form-select" id="projectFilter">
+                                    <option value="all">All Projects</option>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Priority</label>
+                                <select class="form-select" id="priorityFilter">
+                                    <option value="all">All Priorities</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Search Text</label>
+                                <input type="text" class="form-control" id="textSearch" placeholder="Search tasks...">
+                            </div>
+                            
+                            <div class="search-group d-flex align-items-end">
+                                <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Task List -->
-                <div id="tasksContainer">
-                    <!-- Dynamically populated -->
+                    
+                    <!-- Tasks Table -->
+                    <div class="tasks-container">
+                        <div class="tasks-header">
+                            <h3 class="tasks-title">All Tasks</h3>
+                            <div class="tasks-count">Showing <span id="tasksCount">0</span> tasks</div>
+                        </div>
+                        
+                        <div class="tasks-scroll-container">
+                            <table class="tasks-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="title">Title <i class="bi bi-arrow-down"></i></th>
+                                        <th data-sort="project">Project</th>
+                                        <th data-sort="assignee">Assignee</th>
+                                        <th data-sort="priority">Priority</th>
+                                        <th data-sort="status">Status</th>
+                                        <th data-sort="due_date">Due Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasksTableBody">
+                                    <!-- Tasks will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Detail Section -->
+                    <div class="task-detail-container" id="taskDetailContainer">
+                        <div class="task-detail-header">
+                            <div>
+                                <h2 class="task-detail-title">
+                                    <i class="bi bi-card-checklist"></i>
+                                    <span id="taskDetailTitle">Task Title</span>
+                                </h2>
+                                <div class="d-flex gap-2 mt-2">
+                                    <span class="status-badge" id="taskDetailStatus">Status</span>
+                                    <span class="badge" id="taskDetailPriority">Priority</span>
+                                </div>
+                            </div>
+                            <div class="task-detail-actions">
+                                <button class="btn btn-outline-primary" id="editTaskBtn">
+                                    <i class="bi bi-pencil"></i> Edit Task
+                                </button>
+                                <button class="btn btn-outline-secondary" id="closeDetailBtn">
+                                    <i class="bi bi-x-lg"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="task-detail-body">
+                            <div class="detail-section">
+                                <div class="detail-section-title">Task Information</div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Description:</div>
+                                    <div class="detail-value" id="taskDetailDescription">No description provided</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Type:</div>
+                                    <div class="detail-value" id="taskDetailType">Task</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Severity:</div>
+                                    <div class="detail-value" id="taskDetailSeverity">Normal</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Created:</div>
+                                    <div class="detail-value" id="taskDetailCreated">Date</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Updated:</div>
+                                    <div class="detail-value" id="taskDetailUpdated">Date</div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <div class="detail-section-title">Assignment</div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Project:</div>
+                                    <div class="detail-value" id="taskDetailProject">Project Name</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Category:</div>
+                                    <div class="detail-value" id="taskDetailCategory">Category</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Assignee:</div>
+                                    <div class="detail-value" id="taskDetailAssignee">Assignee Name</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Start Date:</div>
+                                    <div class="detail-value" id="taskDetailStartDate">Date</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Due Date:</div>
+                                    <div class="detail-value" id="taskDetailDueDate">Date</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comments-section">
+                            <h4 class="comments-title">Comments</h4>
+                            
+                            <div class="comments-container" id="commentsContainer">
+                                <!-- Comments will be loaded here -->
+                            </div>
+                            
+                            <form class="add-comment-form" id="addCommentForm">
+                                <textarea class="form-control" placeholder="Add a comment..." id="commentInput" required></textarea>
+                                <button type="submit" class="btn btn-primary">Add Comment</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -576,23 +835,6 @@
         </div>
     </div>
     
-    <!-- Task Details Modal -->
-    <div class="modal fade" id="taskDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Task Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="taskDetailContent">
-                        <!-- Dynamically populated -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Edit Task Modal -->
     <div class="modal fade" id="editTaskModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -602,122 +844,108 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="edit-form">
-                        <form id="editTaskForm">
-                            <input type="hidden" id="editTaskId" name="id">
-                            
-                            <div class="form-section">
-                                <div class="form-section-title">Basic Information</div>
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="mb-3">
-                                            <label class="form-label">Task Title</label>
-                                            <input type="text" class="form-control" name="title" id="editTitle" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Task Type</label>
-                                            <select class="form-select" name="type" id="editType">
-                                                <option value="task">Task</option>
-                                                <option value="bug">Bug</option>
-                                                <option value="feature">Feature</option>
-                                                <option value="improvement">Improvement</option>
-                                                <option value="test">Test</option>
-                                                <option value="design">Design</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
+                    <form id="editTaskForm">
+                        <input type="hidden" id="editTaskId" name="id">
+                        
+                        <div class="row">
+                            <div class="col-md-8">
                                 <div class="mb-3">
-                                    <label class="form-label">Description</label>
-                                    <textarea class="form-control" name="description" id="editDescription" rows="3"></textarea>
+                                    <label class="form-label">Task Title</label>
+                                    <input type="text" class="form-control" name="title" id="editTitle" required>
                                 </div>
                             </div>
-                            
-                            <div class="form-section">
-                                <div class="form-section-title">Status & Priority</div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Priority</label>
-                                            <select class="form-select" name="priority" id="editPriority">
-                                                <option value="low">Low</option>
-                                                <option value="medium" selected>Medium</option>
-                                                <option value="high">High</option>
-                                                <option value="urgent">Urgent</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Severity</label>
-                                            <select class="form-select" name="severity" id="editSeverity">
-                                                <option value="trivial">Trivial</option>
-                                                <option value="minor">Minor</option>
-                                                <option value="normal" selected>Normal</option>
-                                                <option value="major">Major</option>
-                                                <option value="critical">Critical</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Status</label>
-                                            <select class="form-select" name="status" id="editStatus">
-                                                <option value="todo" selected>To Do</option>
-                                                <option value="in_progress">In Progress</option>
-                                                <option value="review">In Review</option>
-                                                <option value="done">Done</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Task Type</label>
+                                    <select class="form-select" name="type" id="editType">
+                                        <option value="task">Task</option>
+                                        <option value="bug">Bug</option>
+                                        <option value="feature">Feature</option>
+                                        <option value="improvement">Improvement</option>
+                                        <option value="test">Test</option>
+                                        <option value="design">Design</option>
+                                    </select>
                                 </div>
                             </div>
-                            
-                            <div class="form-section">
-                                <div class="form-section-title">Timeline</div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Start Date</label>
-                                            <input type="datetime-local" class="form-control" name="start_date" id="editStartDate">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Due Date</label>
-                                            <input type="datetime-local" class="form-control" name="due_date" id="editDueDate">
-                                        </div>
-                                    </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" id="editDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Priority</label>
+                                    <select class="form-select" name="priority" id="editPriority">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
                                 </div>
                             </div>
-                            
-                            <div class="form-section">
-                                <div class="form-section-title">Assignment</div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Assignee</label>
-                                            <select class="form-select" name="assignee_id" id="editAssignee">
-                                                <option value="">Unassigned</option>
-                                                <!-- Dynamically populated -->
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Project</label>
-                                            <select class="form-select" name="project_id" id="editProject" required>
-                                                <!-- Dynamically populated -->
-                                            </select>
-                                        </div>
-                                    </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Severity</label>
+                                    <select class="form-select" name="severity" id="editSeverity">
+                                        <option value="trivial">Trivial</option>
+                                        <option value="minor">Minor</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="major">Major</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
                                 </div>
                             </div>
-                        </form>
-                    </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="editStatus">
+                                        <option value="todo" selected>To Do</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="review">In Review</option>
+                                        <option value="done">Done</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="datetime-local" class="form-control" name="start_date" id="editStartDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Due Date</label>
+                                    <input type="datetime-local" class="form-control" name="due_date" id="editDueDate">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assignee</label>
+                                    <select class="form-select" name="assignee_id" id="editAssignee">
+                                        <option value="">Unassigned</option>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Project</label>
+                                    <select class="form-select" name="project_id" id="editProject" required>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -729,603 +957,808 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize data
+            // Load initial data
             loadUsers();
             loadProjects();
             loadTasks();
             
-            // Filter event listeners
-            document.getElementById('statusFilter').addEventListener('change', loadTasks);
-            document.getElementById('assigneeFilter').addEventListener('change', loadTasks);
-            document.getElementById('projectFilter').addEventListener('change', loadTasks);
-            document.getElementById('resetFilters').addEventListener('click', resetFilters);
-            
-            // Create task form submission
-            document.getElementById('submitTaskForm').addEventListener('click', createTask);
-            
-            // Save task changes
-            document.getElementById('saveTaskChanges').addEventListener('click', saveTaskChanges);
+            // Set up event listeners
+            setupEventListeners();
         });
-        
+
+        // Sample data for demonstration
+        const users = [
+            { id: 1, name: "Lilong Xu", title: "Software Manager" },
+            { id: 2, name: "Alex Zhu", title: "Software Engineer" },
+            { id: 3, name: "Xin Guo", title: "Software Engineer" },
+            { id: 4, name: "Jordan Zhou", title: "Software Engineer" },
+            { id: 5, name: "Mingyu Ma", title: "Software Engineer" },
+            { id: 6, name: "Alex Li", title: "Software Engineer" },
+            { id: 7, name: "Feihao Liu", title: "Software Engineer" },
+            { id: 8, name: "Libo Zhu", title: "Software Engineer" },
+            { id: 9, name: "Bin Huang", title: "Software Engineer" },
+            { id: 10, name: "Stephen Zeng", title: "Software Engineer" },
+            { id: 11, name: "Jason Zhang", title: "Software Engineer" },
+            { id: 12, name: "Min Xiong", title: "Software Engineer" },
+            { id: 13, name: "Shenglin Chen", title: "Software Engineer" }
+        ];
+
+        const projects = [
+            { id: 1, name: "Honda 28M_800V_45CC", category: "E-Compressor" },
+            { id: 2, name: "Platform_400V_36CC", category: "E-Compressor" },
+            { id: 3, name: "Platform_800V_45CC", category: "E-Compressor" },
+            { id: 4, name: "STELLANTIS_400V_45CC", category: "E-Compressor" },
+            { id: 5, name: "VW_800V_45CC", category: "E-Compressor" },
+            { id: 6, name: "HD20_800V_57CC", category: "E-Compressor" },
+            { id: 7, name: "Platform_Ti", category: "E-Compressor" },
+            { id: 8, name: "HR18", category: "E-CoolingPump" },
+            { id: 9, name: "XCSP", category: "E-CoolingPump" },
+            { id: 10, name: "Bootloader", category: "Function" },
+            { id: 11, name: "Functional Safety", category: "Function" },
+            { id: 12, name: "CyberSecurity", category: "Function" },
+            { id: 13, name: "Toolchain", category: "Function" },
+            { id: 14, name: "Main Task", category: "Function" }
+        ];
+
+        let tasks = [
+            {
+                id: 1,
+                title: 'ECU Communication Module Development',
+                description: 'Develop communication protocol for Honda 28M_800V_45CC project',
+                type: 'feature',
+                status: 'in_progress',
+                priority: 'high',
+                severity: 'major',
+                start_date: '2024-02-01',
+                due_date: '2024-05-31',
+                created_at: '2024-01-15',
+                updated_at: '2024-04-20',
+                assignee: users[0],
+                project: projects[0],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Initial task setup and assignment completed.',
+                        author: users[0],
+                        date: '2024-01-15'
+                    },
+                    {
+                        id: 2,
+                        content: 'Protocol design phase completed. Moving to implementation.',
+                        author: users[0],
+                        date: '2024-03-10'
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: 'BMS Data Collection Optimization',
+                description: 'Optimize battery data collection algorithm for Platform_400V_36CC project',
+                type: 'improvement',
+                status: 'todo',
+                priority: 'medium',
+                severity: 'normal',
+                start_date: '2024-03-15',
+                due_date: '2024-06-30',
+                created_at: '2024-02-20',
+                updated_at: '2024-03-01',
+                assignee: users[1],
+                project: projects[1],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Task created and assigned to Alex Zhu.',
+                        author: users[0],
+                        date: '2024-02-20'
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: 'ECU UI Interface Design',
+                description: 'Design user interface for ECU controller',
+                type: 'design',
+                status: 'review',
+                priority: 'medium',
+                severity: 'normal',
+                start_date: '2024-01-15',
+                due_date: '2024-04-30',
+                created_at: '2023-12-10',
+                updated_at: '2024-04-15',
+                assignee: users[2],
+                project: projects[0],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Initial design concepts created.',
+                        author: users[2],
+                        date: '2024-01-20'
+                    },
+                    {
+                        id: 2,
+                        content: 'Design submitted for review.',
+                        author: users[2],
+                        date: '2024-04-10'
+                    },
+                    {
+                        id: 3,
+                        content: 'Review in progress.',
+                        author: users[0],
+                        date: '2024-04-15'
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: 'BMS Security Vulnerability Fix',
+                description: 'Fix security vulnerabilities found in battery management system',
+                type: 'bug',
+                status: 'in_progress',
+                priority: 'urgent',
+                severity: 'critical',
+                start_date: '2024-03-01',
+                due_date: '2024-03-31',
+                created_at: '2024-02-28',
+                updated_at: '2024-03-15',
+                assignee: users[3],
+                project: projects[1],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Critical vulnerability identified. Immediate action required.',
+                        author: users[0],
+                        date: '2024-02-28'
+                    },
+                    {
+                        id: 2,
+                        content: 'Working on patch development.',
+                        author: users[3],
+                        date: '2024-03-05'
+                    },
+                    {
+                        id: 3,
+                        content: 'Patch development completed. Starting testing phase.',
+                        author: users[3],
+                        date: '2024-03-15'
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: 'Bootloader Security Verification',
+                description: 'Verify security mechanisms for Bootloader project',
+                type: 'test',
+                status: 'review',
+                priority: 'high',
+                severity: 'critical',
+                start_date: '2024-01-15',
+                due_date: '2024-04-30',
+                created_at: '2023-12-20',
+                updated_at: '2024-04-20',
+                assignee: users[4],
+                project: projects[9],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Security testing initiated.',
+                        author: users[4],
+                        date: '2024-01-20'
+                    },
+                    {
+                        id: 2,
+                        content: 'Initial test results show vulnerabilities.',
+                        author: users[4],
+                        date: '2024-02-15'
+                    },
+                    {
+                        id: 3,
+                        content: 'Vulnerabilities addressed. Final verification in progress.',
+                        author: users[4],
+                        date: '2024-04-15'
+                    }
+                ]
+            },
+            {
+                id: 6,
+                title: 'Functional Safety Compliance',
+                description: 'Ensure compliance with functional safety standards',
+                type: 'compliance',
+                status: 'in_progress',
+                priority: 'high',
+                severity: 'major',
+                start_date: '2024-02-10',
+                due_date: '2024-06-15',
+                created_at: '2024-01-25',
+                updated_at: '2024-04-10',
+                assignee: users[5],
+                project: projects[10],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Compliance requirements documented.',
+                        author: users[5],
+                        date: '2024-02-15'
+                    },
+                    {
+                        id: 2,
+                        content: 'Implementation of safety mechanisms started.',
+                        author: users[5],
+                        date: '2024-03-20'
+                    }
+                ]
+            },
+            {
+                id: 7,
+                title: 'Toolchain Optimization',
+                description: 'Optimize development toolchain for better performance',
+                type: 'improvement',
+                status: 'todo',
+                priority: 'medium',
+                severity: 'normal',
+                start_date: '2024-05-01',
+                due_date: '2024-07-31',
+                created_at: '2024-04-01',
+                updated_at: '2024-04-01',
+                assignee: users[6],
+                project: projects[12],
+                comments: [
+                    {
+                        id: 1,
+                        content: 'Task created and assigned.',
+                        author: users[0],
+                        date: '2024-04-01'
+                    }
+                ]
+            }
+        ];
+
         function loadUsers() {
-            fetch('/api/users')
-                .then(response => response.json())
-                .then(users => {
-                    const assigneeFilter = document.getElementById('assigneeFilter');
-                    const assigneeSelect = document.getElementById('assigneeSelect');
-                    const editAssignee = document.getElementById('editAssignee');
-                    
-                    // Clear existing options (keep first option)
-                    while (assigneeFilter.options.length > 1) {
-                        assigneeFilter.remove(1);
-                    }
-                    while (assigneeSelect.options.length > 1) {
-                        assigneeSelect.remove(1);
-                    }
-                    while (editAssignee.options.length > 1) {
-                        editAssignee.remove(1);
-                    }
-                    
-                    // Add user options
-                    users.forEach(user => {
-                        // Add to filter dropdown
-                        const filterOption = document.createElement('option');
-                        filterOption.value = user.id;
-                        filterOption.textContent = user.full_name || user.username;
-                        assigneeFilter.appendChild(filterOption);
-                        
-                        // Add to create task dropdown
-                        const selectOption = document.createElement('option');
-                        selectOption.value = user.id;
-                        selectOption.textContent = user.full_name || user.username;
-                        assigneeSelect.appendChild(selectOption);
-                        
-                        // Add to edit task dropdown
-                        const editOption = document.createElement('option');
-                        editOption.value = user.id;
-                        editOption.textContent = user.full_name || user.username;
-                        editAssignee.appendChild(editOption);
-                    });
-                });
+            const assigneeFilter = document.getElementById('assigneeFilter');
+            const assigneeSelect = document.getElementById('assigneeSelect');
+            const editAssignee = document.getElementById('editAssignee');
+            
+            // Clear existing options (keep first option)
+            while (assigneeFilter.options.length > 1) {
+                assigneeFilter.remove(1);
+            }
+            while (assigneeSelect.options.length > 1) {
+                assigneeSelect.remove(1);
+            }
+            while (editAssignee.options.length > 1) {
+                editAssignee.remove(1);
+            }
+            
+            // Add user options
+            users.forEach(user => {
+                // Add to filter dropdown
+                const filterOption = document.createElement('option');
+                filterOption.value = user.id;
+                filterOption.textContent = user.name;
+                assigneeFilter.appendChild(filterOption);
+                
+                // Add to create task dropdown
+                const selectOption = document.createElement('option');
+                selectOption.value = user.id;
+                selectOption.textContent = user.name;
+                assigneeSelect.appendChild(selectOption);
+                
+                // Add to edit task dropdown
+                const editOption = document.createElement('option');
+                editOption.value = user.id;
+                editOption.textContent = user.name;
+                editAssignee.appendChild(editOption);
+            });
         }
-        
+
         function loadProjects() {
-            fetch('/api/projects')
-                .then(response => response.json())
-                .then(projects => {
-                    const projectFilter = document.getElementById('projectFilter');
-                    const projectSelect = document.getElementById('projectSelect');
-                    const editProject = document.getElementById('editProject');
-                    
-                    // Clear existing options (keep first option)
-                    while (projectFilter.options.length > 1) {
-                        projectFilter.remove(1);
-                    }
-                    while (projectSelect.options.length > 0) {
-                        projectSelect.remove(0);
-                    }
-                    while (editProject.options.length > 0) {
-                        editProject.remove(0);
-                    }
-                    
-                    // Add to filter dropdown
-                    projects.forEach(project => {
-                        const filterOption = document.createElement('option');
-                        filterOption.value = project.id;
-                        filterOption.textContent = project.name;
-                        projectFilter.appendChild(filterOption);
-                        
-                        // Add to create task dropdown
-                        const selectOption = document.createElement('option');
-                        selectOption.value = project.id;
-                        selectOption.textContent = `${project.name} (${project.category.name})`;
-                        projectSelect.appendChild(selectOption);
-                        
-                        // Add to edit task dropdown
-                        const editOption = document.createElement('option');
-                        editOption.value = project.id;
-                        editOption.textContent = `${project.name} (${project.category.name})`;
-                        editProject.appendChild(editOption);
-                    });
-                });
+            const projectFilter = document.getElementById('projectFilter');
+            const projectSelect = document.getElementById('projectSelect');
+            const editProject = document.getElementById('editProject');
+            
+            // Clear existing options (keep first option)
+            while (projectFilter.options.length > 1) {
+                projectFilter.remove(1);
+            }
+            while (projectSelect.options.length > 0) {
+                projectSelect.remove(0);
+            }
+            while (editProject.options.length > 0) {
+                editProject.remove(0);
+            }
+            
+            // Add to filter dropdown
+            projects.forEach(project => {
+                const filterOption = document.createElement('option');
+                filterOption.value = project.id;
+                filterOption.textContent = project.name;
+                projectFilter.appendChild(filterOption);
+                
+                // Add to create task dropdown
+                const selectOption = document.createElement('option');
+                selectOption.value = project.id;
+                selectOption.textContent = `${project.name} (${project.category})`;
+                projectSelect.appendChild(selectOption);
+                
+                // Add to edit task dropdown
+                const editOption = document.createElement('option');
+                editOption.value = project.id;
+                editOption.textContent = `${project.name} (${project.category})`;
+                editProject.appendChild(editOption);
+            });
         }
-        
+
         function loadTasks() {
             const status = document.getElementById('statusFilter').value;
             const assignee = document.getElementById('assigneeFilter').value;
             const project = document.getElementById('projectFilter').value;
+            const priority = document.getElementById('priorityFilter').value;
+            const text = document.getElementById('textSearch').value.toLowerCase();
             
-            let url = '/api/tasks?';
-            if (status !== 'all') url += `status=${status}&`;
-            if (assignee !== 'all') url += `assignee=${assignee}&`;
-            if (project !== 'all') url += `project=${project}&`;
+            let filteredTasks = tasks;
             
-            fetch(url)
-                .then(response => response.json())
-                .then(tasks => {
-                    const container = document.getElementById('tasksContainer');
-                    container.innerHTML = '';
-                    
-                    if (tasks.length === 0) {
-                        container.innerHTML = `
+            // Apply filters
+            if (status !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.status === status);
+            }
+            
+            if (assignee !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.assignee.id === parseInt(assignee));
+            }
+            
+            if (project !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.project.id === parseInt(project));
+            }
+            
+            if (priority !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority === priority);
+            }
+            
+            if (text) {
+                filteredTasks = filteredTasks.filter(task => 
+                    task.title.toLowerCase().includes(text) ||
+                    (task.description && task.description.toLowerCase().includes(text)) ||
+                    task.project.name.toLowerCase().includes(text) ||
+                    task.assignee.name.toLowerCase().includes(text)
+                );
+            }
+            
+            renderTasksTable(filteredTasks);
+        }
+
+        function renderTasksTable(tasks) {
+            const tableBody = document.getElementById('tasksTableBody');
+            const tasksCount = document.getElementById('tasksCount');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Update tasks count
+            tasksCount.textContent = tasks.length;
+            
+            if (tasks.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
                             <div class="empty-state">
                                 <i class="bi bi-inbox"></i>
                                 <h4>No tasks found</h4>
-                                <p>There are no tasks matching your current filters. Try adjusting your search criteria or create a new task.</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                                    <i class="bi bi-plus-circle"></i> Create New Task
-                                </button>
+                                <p>There are no tasks matching your current filters. Try adjusting your search criteria.</p>
                             </div>
-                        `;
-                        return;
-                    }
-                    
-                    tasks.forEach(task => {
-                        const priorityClass = getPriorityClass(task.priority);
-                        const statusClass = getStatusClass(task.status);
-                        const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set';
-                        const categoryClass = task.project.category.type === 'product' ? 'category-product' : 'category-function';
-                        
-                        const taskCard = document.createElement('div');
-                        taskCard.className = `task-card ${priorityClass}`;
-                        taskCard.innerHTML = `
-                            <div class="task-card-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="task-title">
-                                        <i class="bi bi-card-checklist"></i>
-                                        ${task.title}
-                                    </h3>
-                                    <span class="status-badge ${statusClass}">${getStatusText(task.status)}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="task-card-body">
-                                <p class="task-description">${task.description || 'No description provided'}</p>
-                                
-                                <div class="task-meta">
-                                    <div class="task-info">
-                                        <div class="info-item">
-                                            <i class="bi bi-person"></i>
-                                            ${task.assignee.full_name || task.assignee.username}
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="bi bi-folder"></i>
-                                            ${task.project.name}
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="bi bi-calendar-event"></i>
-                                            ${dueDate}
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="task-actions">
-                                        <button class="btn btn-outline-primary view-details" data-task-id="${task.id}">
-                                            View Details
-                                        </button>
-                                        <i class="bi bi-pencil edit-icon" data-task-id="${task.id}"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        container.appendChild(taskCard);
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Add rows for each task
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.dataset.taskId = task.id;
+                
+                // Format due date
+                const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set';
+                
+                // Priority indicator
+                let priorityClass = '';
+                let priorityText = '';
+                
+                switch(task.priority) {
+                    case 'high':
+                        priorityClass = 'priority-high';
+                        priorityText = 'High';
+                        break;
+                    case 'medium':
+                        priorityClass = 'priority-medium';
+                        priorityText = 'Medium';
+                        break;
+                    case 'low':
+                        priorityClass = 'priority-low';
+                        priorityText = 'Low';
+                        break;
+                    case 'urgent':
+                        priorityClass = 'priority-urgent';
+                        priorityText = 'Urgent';
+                        break;
+                }
+                
+                // Status badge
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(task.status) {
+                    case 'todo':
+                        statusClass = 'status-todo';
+                        statusText = 'To Do';
+                        break;
+                    case 'in_progress':
+                        statusClass = 'status-in_progress';
+                        statusText = 'In Progress';
+                        break;
+                    case 'review':
+                        statusClass = 'status-review';
+                        statusText = 'In Review';
+                        break;
+                    case 'done':
+                        statusClass = 'status-done';
+                        statusText = 'Done';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${task.project.name}</td>
+                    <td>${task.assignee.name}</td>
+                    <td>
+                        <span class="priority-indicator ${priorityClass}"></span>
+                        ${priorityText}
+                    </td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${dueDate}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        function setupEventListeners() {
+            // Task row selection
+            document.getElementById('tasksTableBody').addEventListener('click', function(e) {
+                const row = e.target.closest('tr');
+                if (row && row.dataset.taskId) {
+                    // Remove selected class from all rows
+                    document.querySelectorAll('#tasksTableBody tr').forEach(r => {
+                        r.classList.remove('selected');
                     });
                     
-                    // Add view details event listeners
-                    document.querySelectorAll('.view-details').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const taskId = this.getAttribute('data-task-id');
-                            viewTaskDetails(taskId);
-                        });
-                    });
+                    // Add selected class to clicked row
+                    row.classList.add('selected');
                     
-                    // Add edit task event listeners
-                    document.querySelectorAll('.edit-icon').forEach(icon => {
-                        icon.addEventListener('click', function() {
-                            const taskId = this.getAttribute('data-task-id');
-                            openEditTaskModal(taskId);
-                        });
-                    });
+                    // Get task ID
+                    const taskId = parseInt(row.dataset.taskId);
+                    
+                    // Find task data
+                    const task = tasks.find(t => t.id === taskId);
+                    
+                    // Show task details
+                    showTaskDetails(task);
+                }
+            });
+            
+            // Filter change listeners
+            document.getElementById('statusFilter').addEventListener('change', loadTasks);
+            document.getElementById('assigneeFilter').addEventListener('change', loadTasks);
+            document.getElementById('projectFilter').addEventListener('change', loadTasks);
+            document.getElementById('priorityFilter').addEventListener('change', loadTasks);
+            document.getElementById('textSearch').addEventListener('input', loadTasks);
+            
+            // Reset filters
+            document.getElementById('resetFilters').addEventListener('click', function() {
+                document.getElementById('statusFilter').value = 'all';
+                document.getElementById('assigneeFilter').value = 'all';
+                document.getElementById('projectFilter').value = 'all';
+                document.getElementById('priorityFilter').value = 'all';
+                document.getElementById('textSearch').value = '';
+                loadTasks();
+            });
+            
+            // Create task form submission
+            document.getElementById('submitTaskForm').addEventListener('click', createTask);
+            
+            // Edit task button
+            document.getElementById('editTaskBtn').addEventListener('click', function() {
+                const selectedRow = document.querySelector('#tasksTableBody tr.selected');
+                if (selectedRow) {
+                    const taskId = parseInt(selectedRow.dataset.taskId);
+                    openEditTaskModal(taskId);
+                }
+            });
+            
+            // Close detail button
+            document.getElementById('closeDetailBtn').addEventListener('click', function() {
+                document.getElementById('taskDetailContainer').style.display = 'none';
+                document.querySelector('#tasksTableBody tr.selected')?.classList.remove('selected');
+            });
+            
+            // Save task changes
+            document.getElementById('saveTaskChanges').addEventListener('click', saveTaskChanges);
+            
+            // Add comment form submission
+            document.getElementById('addCommentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addComment();
+            });
+        }
+
+        function showTaskDetails(task) {
+            const container = document.getElementById('taskDetailContainer');
+            container.style.display = 'block';
+            
+            // Set task details
+            document.getElementById('taskDetailTitle').textContent = task.title;
+            
+            // Status badge
+            let statusClass = '';
+            let statusText = '';
+            
+            switch(task.status) {
+                case 'todo':
+                    statusClass = 'status-todo';
+                    statusText = 'To Do';
+                    break;
+                case 'in_progress':
+                    statusClass = 'status-in_progress';
+                    statusText = 'In Progress';
+                    break;
+                case 'review':
+                    statusClass = 'status-review';
+                    statusText = 'In Review';
+                    break;
+                case 'done':
+                    statusClass = 'status-done';
+                    statusText = 'Done';
+                    break;
+            }
+            
+            document.getElementById('taskDetailStatus').className = `status-badge ${statusClass}`;
+            document.getElementById('taskDetailStatus').textContent = statusText;
+            
+            // Priority badge
+            let priorityClass = '';
+            let priorityText = '';
+            
+            switch(task.priority) {
+                case 'high':
+                    priorityClass = 'bg-danger';
+                    priorityText = 'High';
+                    break;
+                case 'medium':
+                    priorityClass = 'bg-warning';
+                    priorityText = 'Medium';
+                    break;
+                case 'low':
+                    priorityClass = 'bg-success';
+                    priorityText = 'Low';
+                    break;
+                case 'urgent':
+                    priorityClass = 'bg-primary';
+                    priorityText = 'Urgent';
+                    break;
+            }
+            
+            document.getElementById('taskDetailPriority').className = `badge ${priorityClass}`;
+            document.getElementById('taskDetailPriority').textContent = priorityText;
+            
+            // Format dates
+            const formatDate = (dateString) => {
+                if (!dateString) return 'Not set';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
                 });
+            };
+            
+            // Set other details
+            document.getElementById('taskDetailDescription').textContent = task.description || 'No description provided';
+            document.getElementById('taskDetailType').textContent = task.type.charAt(0).toUpperCase() + task.type.slice(1);
+            document.getElementById('taskDetailSeverity').textContent = task.severity.charAt(0).toUpperCase() + task.severity.slice(1);
+            document.getElementById('taskDetailCreated').textContent = formatDate(task.created_at);
+            document.getElementById('taskDetailUpdated').textContent = formatDate(task.updated_at);
+            document.getElementById('taskDetailProject').textContent = task.project.name;
+            document.getElementById('taskDetailCategory').textContent = task.project.category;
+            document.getElementById('taskDetailAssignee').textContent = task.assignee.name;
+            document.getElementById('taskDetailStartDate').textContent = formatDate(task.start_date);
+            document.getElementById('taskDetailDueDate').textContent = formatDate(task.due_date);
+            
+            // Render comments
+            renderComments(task.comments);
         }
-        
-        function resetFilters() {
-            document.getElementById('statusFilter').value = 'all';
-            document.getElementById('assigneeFilter').value = 'all';
-            document.getElementById('projectFilter').value = 'all';
+
+        function renderComments(comments) {
+            const container = document.getElementById('commentsContainer');
+            container.innerHTML = '';
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<p class="text-muted">No comments yet</p>';
+                return;
+            }
+            
+            comments.forEach(comment => {
+                const commentCard = document.createElement('div');
+                commentCard.className = 'comment-card';
+                
+                // Format date
+                const date = new Date(comment.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                commentCard.innerHTML = `
+                    <div class="comment-header">
+                        <div class="comment-author">${comment.author.name}</div>
+                        <div class="comment-date">${formattedDate}</div>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                `;
+                
+                container.appendChild(commentCard);
+            });
+        }
+
+        function addComment() {
+            const commentInput = document.getElementById('commentInput');
+            const comment = commentInput.value.trim();
+            
+            if (!comment) return;
+            
+            const selectedRow = document.querySelector('#tasksTableBody tr.selected');
+            if (!selectedRow) return;
+            
+            const taskId = parseInt(selectedRow.dataset.taskId);
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task) {
+                const newComment = {
+                    id: task.comments.length + 1,
+                    content: comment,
+                    author: users[0], // Current user (in real app, this would be logged in user)
+                    date: new Date().toISOString()
+                };
+                
+                task.comments.push(newComment);
+                renderComments(task.comments);
+                
+                // Clear input
+                commentInput.value = '';
+            }
+        }
+
+        function openEditTaskModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Set form values
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTitle').value = task.title;
+            document.getElementById('editDescription').value = task.description || '';
+            document.getElementById('editType').value = task.type;
+            document.getElementById('editPriority').value = task.priority;
+            document.getElementById('editSeverity').value = task.severity;
+            document.getElementById('editStatus').value = task.status;
+            document.getElementById('editAssignee').value = task.assignee.id;
+            document.getElementById('editProject').value = task.project.id;
+            
+            // Format dates for datetime-local inputs
+            const formatDateForInput = (dateString) => {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toISOString().slice(0, 16);
+            };
+            
+            document.getElementById('editStartDate').value = formatDateForInput(task.start_date);
+            document.getElementById('editDueDate').value = formatDateForInput(task.due_date);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+            modal.show();
+        }
+
+        function saveTaskChanges() {
+            const taskId = parseInt(document.getElementById('editTaskId').value);
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (!task) return;
+            
+            // Update task fields
+            task.title = document.getElementById('editTitle').value;
+            task.description = document.getElementById('editDescription').value;
+            task.type = document.getElementById('editType').value;
+            task.priority = document.getElementById('editPriority').value;
+            task.severity = document.getElementById('editSeverity').value;
+            task.status = document.getElementById('editStatus').value;
+            
+            // Update assignee
+            const assigneeId = parseInt(document.getElementById('editAssignee').value);
+            task.assignee = users.find(u => u.id === assigneeId) || null;
+            
+            // Update project
+            const projectId = parseInt(document.getElementById('editProject').value);
+            task.project = projects.find(p => p.id === projectId);
+            
+            // Update dates
+            task.start_date = document.getElementById('editStartDate').value || null;
+            task.due_date = document.getElementById('editDueDate').value || null;
+            
+            // Update timestamp
+            task.updated_at = new Date().toISOString();
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+            modal.hide();
+            
+            // Reload tasks
             loadTasks();
+            
+            // Update task details if shown
+            if (document.getElementById('taskDetailContainer').style.display === 'block') {
+                showTaskDetails(task);
+            }
+            
+            alert('Task updated successfully!');
         }
-        
+
         function createTask() {
             const form = document.getElementById('createTaskForm');
             const formData = new FormData(form);
             
-            const taskData = {
+            const newTask = {
+                id: tasks.length + 1,
                 title: formData.get('title'),
                 description: formData.get('description'),
                 type: formData.get('type'),
                 status: formData.get('status'),
                 priority: formData.get('priority'),
                 severity: formData.get('severity'),
-                project_id: parseInt(formData.get('project_id'))
+                start_date: formData.get('start_date') || null,
+                due_date: formData.get('due_date') || null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                comments: []
             };
             
+            // Assignee
             const assigneeId = formData.get('assignee_id');
             if (assigneeId) {
-                taskData.assignee_id = parseInt(assigneeId);
+                newTask.assignee = users.find(u => u.id === parseInt(assigneeId));
             }
             
-            const startDate = formData.get('start_date');
-            if (startDate) {
-                taskData.start_date = new Date(startDate).toISOString();
+            // Project
+            const projectId = formData.get('project_id');
+            if (projectId) {
+                newTask.project = projects.find(p => p.id === parseInt(projectId));
             }
             
-            const dueDate = formData.get('due_date');
-            if (dueDate) {
-                taskData.due_date = new Date(dueDate).toISOString();
-            }
+            // Add to tasks
+            tasks.push(newTask);
             
-            fetch('/api/tasks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(taskData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Failed to create task');
-            })
-            .then(data => {
-                // Close modal and reset form
-                const modal = bootstrap.Modal.getInstance(document.getElementById('createTaskModal'));
-                modal.hide();
-                form.reset();
-                
-                // Reload task list
-                loadTasks();
-                
-                alert('Task created successfully!');
-            })
-            .catch(error => {
-                alert(error.message);
-            });
-        }
-        
-        function viewTaskDetails(taskId) {
-            fetch(`/api/tasks/${taskId}`)
-                .then(response => response.json())
-                .then(task => {
-                    const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
-                    const modalContent = document.getElementById('taskDetailContent');
-                    
-                    // Format dates
-                    const startDate = task.start_date ? new Date(task.start_date).toLocaleDateString() : 'Not set';
-                    const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set';
-                    const createdDate = new Date(task.created_at).toLocaleDateString();
-                    const updatedDate = new Date(task.updated_at).toLocaleDateString();
-                    
-                    modalContent.innerHTML = `
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h3 class="task-title">
-                                    <i class="bi bi-card-checklist"></i>
-                                    ${task.title}
-                                </h3>
-                                <i class="bi bi-pencil edit-icon" data-task-id="${task.id}" style="font-size: 24px;"></i>
-                            </div>
-                            <div class="d-flex gap-2 mt-2">
-                                <span class="status-badge ${getStatusClass(task.status)}">${getStatusText(task.status)}</span>
-                                <span class="badge ${getPriorityClass(task.priority)}">${getPriorityText(task.priority)}</span>
-                                <span class="badge ${getSeverityClass(task.severity)}">${getSeverityText(task.severity)}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h5 class="mb-3">Description</h5>
-                            <p class="task-description">${task.description || 'No description provided'}</p>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">Task Details</h5>
-                                        <div class="mb-2">
-                                            <strong>Type:</strong> ${task.type}
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Assignee:</strong> ${task.assignee.full_name || task.assignee.username} (${task.assignee.title})
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Project:</strong> ${task.project.name}
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Category:</strong> 
-                                            <span class="category-badge ${task.project.category.type === 'product' ? 'category-product' : 'category-function'}">
-                                                ${task.project.category.name} (${task.project.category.type})
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">Timeline</h5>
-                                        <div class="mb-2">
-                                            <strong>Start Date:</strong> ${startDate}
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Due Date:</strong> ${dueDate}
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Created At:</strong> ${createdDate}
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Updated At:</strong> ${updatedDate}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <h5 class="mb-3">Comments</h5>
-                            <div id="taskComments">
-                                <!-- Comments will be loaded dynamically -->
-                            </div>
-                            <form class="mt-3" id="addCommentForm">
-                                <div class="input-group">
-                                    <textarea class="form-control" placeholder="Add a comment..." rows="2" name="content" required></textarea>
-                                    <button class="btn btn-primary" type="submit">Submit</button>
-                                </div>
-                            </form>
-                        </div>
-                    `;
-                    
-                    // Load comments
-                    loadComments(taskId);
-                    
-                    // Add comment form submission event
-                    document.getElementById('addCommentForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        addComment(taskId);
-                    });
-                    
-                    // Add edit icon event listener
-                    document.querySelector('.edit-icon').addEventListener('click', function() {
-                        const taskId = this.getAttribute('data-task-id');
-                        modal.hide();
-                        openEditTaskModal(taskId);
-                    });
-                    
-                    modal.show();
-                });
-        }
-        
-        function openEditTaskModal(taskId) {
-            fetch(`/api/tasks/${taskId}`)
-                .then(response => response.json())
-                .then(task => {
-                    const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
-                    
-                    // Populate form fields
-                    document.getElementById('editTaskId').value = task.id;
-                    document.getElementById('editTitle').value = task.title;
-                    document.getElementById('editDescription').value = task.description || '';
-                    document.getElementById('editType').value = task.type;
-                    document.getElementById('editPriority').value = task.priority;
-                    document.getElementById('editSeverity').value = task.severity;
-                    document.getElementById('editStatus').value = task.status;
-                    
-                    // Set dates
-                    if (task.start_date) {
-                        const startDate = new Date(task.start_date);
-                        document.getElementById('editStartDate').value = startDate.toISOString().slice(0, 16);
-                    } else {
-                        document.getElementById('editStartDate').value = '';
-                    }
-                    
-                    if (task.due_date) {
-                        const dueDate = new Date(task.due_date);
-                        document.getElementById('editDueDate').value = dueDate.toISOString().slice(0, 16);
-                    } else {
-                        document.getElementById('editDueDate').value = '';
-                    }
-                    
-                    // Set assignee
-                    if (task.assignee && task.assignee.id) {
-                        document.getElementById('editAssignee').value = task.assignee.id;
-                    } else {
-                        document.getElementById('editAssignee').value = '';
-                    }
-                    
-                    // Set project
-                    document.getElementById('editProject').value = task.project.id;
-                    
-                    modal.show();
-                });
-        }
-        
-        function saveTaskChanges() {
-            const form = document.getElementById('editTaskForm');
-            const formData = new FormData(form);
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createTaskModal'));
+            modal.hide();
             
-            const taskData = {
-                id: formData.get('id'),
-                title: formData.get('title'),
-                description: formData.get('description'),
-                type: formData.get('type'),
-                status: formData.get('status'),
-                priority: formData.get('priority'),
-                severity: formData.get('severity'),
-                project_id: parseInt(formData.get('project_id'))
-            };
+            // Reset form
+            form.reset();
             
-            const assigneeId = formData.get('assignee_id');
-            if (assigneeId) {
-                taskData.assignee_id = parseInt(assigneeId);
-            } else {
-                taskData.assignee_id = null;
-            }
+            // Reload tasks
+            loadTasks();
             
-            const startDate = formData.get('start_date');
-            if (startDate) {
-                taskData.start_date = new Date(startDate).toISOString();
-            } else {
-                taskData.start_date = null;
-            }
-            
-            const dueDate = formData.get('due_date');
-            if (dueDate) {
-                taskData.due_date = new Date(dueDate).toISOString();
-            } else {
-                taskData.due_date = null;
-            }
-            
-            fetch(`/api/tasks/${taskData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(taskData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Failed to update task');
-            })
-            .then(data => {
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
-                modal.hide();
-                
-                // Reload task list
-                loadTasks();
-                
-                alert('Task updated successfully!');
-            })
-            .catch(error => {
-                alert(error.message);
-            });
-        }
-        
-        function loadComments(taskId) {
-            fetch(`/api/tasks/${taskId}/comments`)
-                .then(response => response.json())
-                .then(comments => {
-                    const commentsContainer = document.getElementById('taskComments');
-                    commentsContainer.innerHTML = '';
-                    
-                    if (comments.length === 0) {
-                        commentsContainer.innerHTML = '<p class="text-muted">No comments yet</p>';
-                        return;
-                    }
-                    
-                    comments.forEach(comment => {
-                        const commentDate = new Date(comment.created_at).toLocaleString();
-                        const commentElement = document.createElement('div');
-                        commentElement.className = 'card mb-3';
-                        commentElement.innerHTML = `
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <strong>${comment.author.username}</strong>
-                                    <small class="text-muted">${commentDate}</small>
-                                </div>
-                                <p class="mb-0">${comment.content}</p>
-                            </div>
-                        `;
-                        commentsContainer.appendChild(commentElement);
-                    });
-                });
-        }
-        
-        function addComment(taskId) {
-            const form = document.getElementById('addCommentForm');
-            const formData = new FormData(form);
-            const content = formData.get('content');
-            
-            fetch(`/api/tasks/${taskId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content })
-            })
-            .then(response => {
-                if (response.ok) {
-                    form.reset();
-                    loadComments(taskId);
-                } else {
-                    alert('Failed to add comment');
-                }
-            });
-        }
-        
-        function getPriorityClass(priority) {
-            switch(priority) {
-                case 'high': case 'urgent': return 'high-priority';
-                case 'medium': return 'medium-priority';
-                case 'low': return 'low-priority';
-                default: return '';
-            }
-        }
-        
-        function getPriorityText(priority) {
-            switch(priority) {
-                case 'low': return 'Low';
-                case 'medium': return 'Medium';
-                case 'high': return 'High';
-                case 'urgent': return 'Urgent';
-                default: return priority;
-            }
-        }
-        
-        function getSeverityClass(severity) {
-            switch(severity) {
-                case 'trivial': return 'bg-light text-dark';
-                case 'minor': return 'bg-info text-white';
-                case 'normal': return 'bg-primary text-white';
-                case 'major': return 'bg-warning text-dark';
-                case 'critical': return 'bg-danger text-white';
-                default: return 'bg-secondary text-white';
-            }
-        }
-        
-        function getSeverityText(severity) {
-            switch(severity) {
-                case 'trivial': return 'Trivial';
-                case 'minor': return 'Minor';
-                case 'normal': return 'Normal';
-                case 'major': return 'Major';
-                case 'critical': return 'Critical';
-                default: return severity;
-            }
-        }
-        
-        function getStatusClass(status) {
-            switch(status) {
-                case 'todo': return 'status-todo';
-                case 'in_progress': return 'status-in_progress';
-                case 'review': return 'status-review';
-                case 'done': return 'status-done';
-                default: return '';
-            }
-        }
-        
-        function getStatusText(status) {
-            switch(status) {
-                case 'todo': return 'To Do';
-                case 'in_progress': return 'In Progress';
-                case 'review': return 'In Review';
-                case 'done': return 'Done';
-                default: return status;
-            }
+            alert('Task created successfully!');
         }
     </script>
 </body>
