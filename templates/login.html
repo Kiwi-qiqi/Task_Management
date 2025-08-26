@@ -1,0 +1,257 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Task Management Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #222D60;
+            --accent-color: #3A4A8C;
+            --light-accent: #5A6ABF;
+            --text-color: #333333;
+            --light-gray: #F5F7FA;
+        }
+        
+        body {
+            background-color: var(--primary-color);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: linear-gradient(135deg, var(--primary-color) 0%, #1A2450 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(58, 74, 140, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(90, 106, 191, 0.15) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 15px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .login-header {
+            background: var(--primary-color);
+            padding: 30px 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-header::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 15px var(--primary-color);
+        }
+        
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .logo-icon {
+            background: white;
+            color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-body {
+            padding: 40px 30px 30px;
+        }
+        
+        .form-control {
+            border: 1px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 12px 15px;
+            height: 48px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--light-accent);
+            box-shadow: 0 0 0 3px rgba(90, 106, 191, 0.15);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+        
+        .btn-login {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            height: 48px;
+        }
+        
+        .btn-login:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 45, 96, 0.3);
+        }
+        
+        .floating-label {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .floating-label .form-control {
+            padding-top: 20px;
+        }
+        
+        .floating-label label {
+            position: absolute;
+            top: 12px;
+            left: 15px;
+            color: #6c757d;
+            font-size: 14px;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        
+        .floating-label .form-control:focus ~ label,
+        .floating-label .form-control:not(:placeholder-shown) ~ label {
+            top: 5px;
+            font-size: 12px;
+            color: var(--accent-color);
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .divider::before {
+            margin-right: 10px;
+        }
+        
+        .divider::after {
+            margin-left: 10px;
+        }
+        
+        .footer-note {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .footer-note a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-icon">
+                    <i class="bi bi-list-task"></i>
+                </div>
+                <div class="logo">Task Management</div>
+            </div>
+            
+            <div class="login-body">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alert alert-danger">
+                            {{ messages[0] }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="floating-label">
+                        <input type="text" class="form-control" id="username" name="username" placeholder=" " required>
+                        <label for="username">Username</label>
+                    </div>
+                    
+                    <div class="floating-label">
+                        <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                        <label for="password">Password</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login w-100">Login</button>
+                </form>
+                
+                <div class="divider">or</div>
+                
+                <div class="footer-note">
+                    Default admin account: <strong>admin</strong> / <strong>admin123</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,1332 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #222D60;
+            --accent-color: #3A4A8C;
+            --light-accent: #5A6ABF;
+            --text-color: #333333;
+            --light-gray: #F5F7FA;
+            --card-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        body {
+            background-color: #F8FAFC;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 30px;
+            width: 250px;
+            z-index: 1000;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 12px 25px;
+            margin: 4px 0;
+            border-radius: 0;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover, 
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding-left: 30px;
+        }
+        
+        .sidebar .nav-link.active {
+            border-left: 4px solid var(--light-accent);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+        
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .header-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-primary i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 45, 96, 0.2);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .filter-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+        
+        .form-select, .form-control {
+            border: 1px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 10px 15px;
+            height: 46px;
+            transition: all 0.3s;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: var(--light-accent);
+            box-shadow: 0 0 0 3px rgba(90, 106, 191, 0.15);
+        }
+        
+        .btn-outline-secondary {
+            border: 1px solid #e1e5eb;
+            border-radius: 8px;
+            height: 46px;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--light-gray);
+            border-color: #d1d9e6;
+        }
+        
+        .task-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+            overflow: hidden;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .task-card.high-priority {
+            border-left-color: #E74C3C;
+        }
+        
+        .task-card.medium-priority {
+            border-left-color: #F39C12;
+        }
+        
+        .task-card.low-priority {
+            border-left-color: #2ECC71;
+        }
+        
+        .task-card-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-title i {
+            margin-right: 10px;
+            color: var(--light-accent);
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .status-todo {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498DB;
+        }
+        
+        .status-in_progress {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ECC71;
+        }
+        
+        .status-review {
+            background: rgba(241, 196, 15, 0.1);
+            color: #F1C40F;
+        }
+        
+        .status-done {
+            background: rgba(155, 89, 182, 0.1);
+            color: #9B59B6;
+        }
+        
+        .task-card-body {
+            padding: 20px;
+        }
+        
+        .task-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .info-item i {
+            margin-right: 8px;
+            color: var(--light-accent);
+            font-size: 16px;
+        }
+        
+        .task-actions .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .category-badge {
+            background: rgba(90, 106, 191, 0.1);
+            color: var(--light-accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .category-product {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ECC71;
+        }
+        
+        .category-function {
+            background: rgba(155, 89, 182, 0.1);
+            color: #9B59B6;
+        }
+        
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            color: var(--light-accent);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #6c757d;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+        
+        .edit-icon {
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+        
+        .edit-icon:hover {
+            color: var(--accent-color);
+            transform: scale(1.1);
+        }
+        
+        .edit-form {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .form-section {
+            margin-bottom: 20px;
+        }
+        
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .task-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .task-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="d-flex justify-content-center mb-5">
+                    <h4 style="color: white; font-weight: 600;">Task Management</h4>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="bi bi-list-task"></i> Task Management
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="col-md-10 main-content">
+                <div class="header-bar">
+                    <h1 class="header-title">Task Management</h1>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                        <i class="bi bi-plus-circle"></i> Create Task
+                    </button>
+                </div>
+                
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="todo">To Do</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="review">In Review</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Assignee</label>
+                            <select class="form-select" id="assigneeFilter">
+                                <option value="all">All Assignees</option>
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Project</label>
+                            <select class="form-select" id="projectFilter">
+                                <option value="all">All Projects</option>
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" id="resetFilters">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task List -->
+                <div id="tasksContainer">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Task Modal -->
+    <div class="modal fade" id="createTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createTaskForm">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">Task Title</label>
+                                    <input type="text" class="form-control" name="title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Task Type</label>
+                                    <select class="form-select" name="type">
+                                        <option value="task">Task</option>
+                                        <option value="bug">Bug</option>
+                                        <option value="feature">Feature</option>
+                                        <option value="improvement">Improvement</option>
+                                        <option value="test">Test</option>
+                                        <option value="design">Design</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Priority</label>
+                                    <select class="form-select" name="priority">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Severity</label>
+                                    <select class="form-select" name="severity">
+                                        <option value="trivial">Trivial</option>
+                                        <option value="minor">Minor</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="major">Major</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status">
+                                        <option value="todo" selected>To Do</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="review">In Review</option>
+                                        <option value="done">Done</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="datetime-local" class="form-control" name="start_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Due Date</label>
+                                    <input type="datetime-local" class="form-control" name="due_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assignee</label>
+                                    <select class="form-select" name="assignee_id" id="assigneeSelect">
+                                        <option value="">Unassigned</option>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Project</label>
+                                    <select class="form-select" name="project_id" id="projectSelect" required>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitTaskForm">Create Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Task Details Modal -->
+    <div class="modal fade" id="taskDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Task Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="taskDetailContent">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Task Modal -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="edit-form">
+                        <form id="editTaskForm">
+                            <input type="hidden" id="editTaskId" name="id">
+                            
+                            <div class="form-section">
+                                <div class="form-section-title">Basic Information</div>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label class="form-label">Task Title</label>
+                                            <input type="text" class="form-control" name="title" id="editTitle" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Task Type</label>
+                                            <select class="form-select" name="type" id="editType">
+                                                <option value="task">Task</option>
+                                                <option value="bug">Bug</option>
+                                                <option value="feature">Feature</option>
+                                                <option value="improvement">Improvement</option>
+                                                <option value="test">Test</option>
+                                                <option value="design">Design</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" name="description" id="editDescription" rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <div class="form-section-title">Status & Priority</div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Priority</label>
+                                            <select class="form-select" name="priority" id="editPriority">
+                                                <option value="low">Low</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="urgent">Urgent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Severity</label>
+                                            <select class="form-select" name="severity" id="editSeverity">
+                                                <option value="trivial">Trivial</option>
+                                                <option value="minor">Minor</option>
+                                                <option value="normal" selected>Normal</option>
+                                                <option value="major">Major</option>
+                                                <option value="critical">Critical</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Status</label>
+                                            <select class="form-select" name="status" id="editStatus">
+                                                <option value="todo" selected>To Do</option>
+                                                <option value="in_progress">In Progress</option>
+                                                <option value="review">In Review</option>
+                                                <option value="done">Done</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <div class="form-section-title">Timeline</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Start Date</label>
+                                            <input type="datetime-local" class="form-control" name="start_date" id="editStartDate">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Due Date</label>
+                                            <input type="datetime-local" class="form-control" name="due_date" id="editDueDate">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <div class="form-section-title">Assignment</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Assignee</label>
+                                            <select class="form-select" name="assignee_id" id="editAssignee">
+                                                <option value="">Unassigned</option>
+                                                <!-- Dynamically populated -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Project</label>
+                                            <select class="form-select" name="project_id" id="editProject" required>
+                                                <!-- Dynamically populated -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveTaskChanges">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data
+            loadUsers();
+            loadProjects();
+            loadTasks();
+            
+            // Filter event listeners
+            document.getElementById('statusFilter').addEventListener('change', loadTasks);
+            document.getElementById('assigneeFilter').addEventListener('change', loadTasks);
+            document.getElementById('projectFilter').addEventListener('change', loadTasks);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
+            
+            // Create task form submission
+            document.getElementById('submitTaskForm').addEventListener('click', createTask);
+            
+            // Save task changes
+            document.getElementById('saveTaskChanges').addEventListener('click', saveTaskChanges);
+        });
+        
+        function loadUsers() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const assigneeFilter = document.getElementById('assigneeFilter');
+                    const assigneeSelect = document.getElementById('assigneeSelect');
+                    const editAssignee = document.getElementById('editAssignee');
+                    
+                    // Clear existing options (keep first option)
+                    while (assigneeFilter.options.length > 1) {
+                        assigneeFilter.remove(1);
+                    }
+                    while (assigneeSelect.options.length > 1) {
+                        assigneeSelect.remove(1);
+                    }
+                    while (editAssignee.options.length > 1) {
+                        editAssignee.remove(1);
+                    }
+                    
+                    // Add user options
+                    users.forEach(user => {
+                        // Add to filter dropdown
+                        const filterOption = document.createElement('option');
+                        filterOption.value = user.id;
+                        filterOption.textContent = user.full_name || user.username;
+                        assigneeFilter.appendChild(filterOption);
+                        
+                        // Add to create task dropdown
+                        const selectOption = document.createElement('option');
+                        selectOption.value = user.id;
+                        selectOption.textContent = user.full_name || user.username;
+                        assigneeSelect.appendChild(selectOption);
+                        
+                        // Add to edit task dropdown
+                        const editOption = document.createElement('option');
+                        editOption.value = user.id;
+                        editOption.textContent = user.full_name || user.username;
+                        editAssignee.appendChild(editOption);
+                    });
+                });
+        }
+        
+        function loadProjects() {
+            fetch('/api/projects')
+                .then(response => response.json())
+                .then(projects => {
+                    const projectFilter = document.getElementById('projectFilter');
+                    const projectSelect = document.getElementById('projectSelect');
+                    const editProject = document.getElementById('editProject');
+                    
+                    // Clear existing options (keep first option)
+                    while (projectFilter.options.length > 1) {
+                        projectFilter.remove(1);
+                    }
+                    while (projectSelect.options.length > 0) {
+                        projectSelect.remove(0);
+                    }
+                    while (editProject.options.length > 0) {
+                        editProject.remove(0);
+                    }
+                    
+                    // Add to filter dropdown
+                    projects.forEach(project => {
+                        const filterOption = document.createElement('option');
+                        filterOption.value = project.id;
+                        filterOption.textContent = project.name;
+                        projectFilter.appendChild(filterOption);
+                        
+                        // Add to create task dropdown
+                        const selectOption = document.createElement('option');
+                        selectOption.value = project.id;
+                        selectOption.textContent = `${project.name} (${project.category.name})`;
+                        projectSelect.appendChild(selectOption);
+                        
+                        // Add to edit task dropdown
+                        const editOption = document.createElement('option');
+                        editOption.value = project.id;
+                        editOption.textContent = `${project.name} (${project.category.name})`;
+                        editProject.appendChild(editOption);
+                    });
+                });
+        }
+        
+        function loadTasks() {
+            const status = document.getElementById('statusFilter').value;
+            const assignee = document.getElementById('assigneeFilter').value;
+            const project = document.getElementById('projectFilter').value;
+            
+            let url = '/api/tasks?';
+            if (status !== 'all') url += `status=${status}&`;
+            if (assignee !== 'all') url += `assignee=${assignee}&`;
+            if (project !== 'all') url += `project=${project}&`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(tasks => {
+                    const container = document.getElementById('tasksContainer');
+                    container.innerHTML = '';
+                    
+                    if (tasks.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h4>No tasks found</h4>
+                                <p>There are no tasks matching your current filters. Try adjusting your search criteria or create a new task.</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                                    <i class="bi bi-plus-circle"></i> Create New Task
+                                </button>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    tasks.forEach(task => {
+                        const priorityClass = getPriorityClass(task.priority);
+                        const statusClass = getStatusClass(task.status);
+                        const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set';
+                        const categoryClass = task.project.category.type === 'product' ? 'category-product' : 'category-function';
+                        
+                        const taskCard = document.createElement('div');
+                        taskCard.className = `task-card ${priorityClass}`;
+                        taskCard.innerHTML = `
+                            <div class="task-card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3 class="task-title">
+                                        <i class="bi bi-card-checklist"></i>
+                                        ${task.title}
+                                    </h3>
+                                    <span class="status-badge ${statusClass}">${getStatusText(task.status)}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="task-card-body">
+                                <p class="task-description">${task.description || 'No description provided'}</p>
+                                
+                                <div class="task-meta">
+                                    <div class="task-info">
+                                        <div class="info-item">
+                                            <i class="bi bi-person"></i>
+                                            ${task.assignee.full_name || task.assignee.username}
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-folder"></i>
+                                            ${task.project.name}
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-calendar-event"></i>
+                                            ${dueDate}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="task-actions">
+                                        <button class="btn btn-outline-primary view-details" data-task-id="${task.id}">
+                                            View Details
+                                        </button>
+                                        <i class="bi bi-pencil edit-icon" data-task-id="${task.id}"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(taskCard);
+                    });
+                    
+                    // Add view details event listeners
+                    document.querySelectorAll('.view-details').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const taskId = this.getAttribute('data-task-id');
+                            viewTaskDetails(taskId);
+                        });
+                    });
+                    
+                    // Add edit task event listeners
+                    document.querySelectorAll('.edit-icon').forEach(icon => {
+                        icon.addEventListener('click', function() {
+                            const taskId = this.getAttribute('data-task-id');
+                            openEditTaskModal(taskId);
+                        });
+                    });
+                });
+        }
+        
+        function resetFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('assigneeFilter').value = 'all';
+            document.getElementById('projectFilter').value = 'all';
+            loadTasks();
+        }
+        
+        function createTask() {
+            const form = document.getElementById('createTaskForm');
+            const formData = new FormData(form);
+            
+            const taskData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                type: formData.get('type'),
+                status: formData.get('status'),
+                priority: formData.get('priority'),
+                severity: formData.get('severity'),
+                project_id: parseInt(formData.get('project_id'))
+            };
+            
+            const assigneeId = formData.get('assignee_id');
+            if (assigneeId) {
+                taskData.assignee_id = parseInt(assigneeId);
+            }
+            
+            const startDate = formData.get('start_date');
+            if (startDate) {
+                taskData.start_date = new Date(startDate).toISOString();
+            }
+            
+            const dueDate = formData.get('due_date');
+            if (dueDate) {
+                taskData.due_date = new Date(dueDate).toISOString();
+            }
+            
+            fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to create task');
+            })
+            .then(data => {
+                // Close modal and reset form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createTaskModal'));
+                modal.hide();
+                form.reset();
+                
+                // Reload task list
+                loadTasks();
+                
+                alert('Task created successfully!');
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        }
+        
+        function viewTaskDetails(taskId) {
+            fetch(`/api/tasks/${taskId}`)
+                .then(response => response.json())
+                .then(task => {
+                    const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+                    const modalContent = document.getElementById('taskDetailContent');
+                    
+                    // Format dates
+                    const startDate = task.start_date ? new Date(task.start_date).toLocaleDateString() : 'Not set';
+                    const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set';
+                    const createdDate = new Date(task.created_at).toLocaleDateString();
+                    const updatedDate = new Date(task.updated_at).toLocaleDateString();
+                    
+                    modalContent.innerHTML = `
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h3 class="task-title">
+                                    <i class="bi bi-card-checklist"></i>
+                                    ${task.title}
+                                </h3>
+                                <i class="bi bi-pencil edit-icon" data-task-id="${task.id}" style="font-size: 24px;"></i>
+                            </div>
+                            <div class="d-flex gap-2 mt-2">
+                                <span class="status-badge ${getStatusClass(task.status)}">${getStatusText(task.status)}</span>
+                                <span class="badge ${getPriorityClass(task.priority)}">${getPriorityText(task.priority)}</span>
+                                <span class="badge ${getSeverityClass(task.severity)}">${getSeverityText(task.severity)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="mb-3">Description</h5>
+                            <p class="task-description">${task.description || 'No description provided'}</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">Task Details</h5>
+                                        <div class="mb-2">
+                                            <strong>Type:</strong> ${task.type}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Assignee:</strong> ${task.assignee.full_name || task.assignee.username} (${task.assignee.title})
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Project:</strong> ${task.project.name}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Category:</strong> 
+                                            <span class="category-badge ${task.project.category.type === 'product' ? 'category-product' : 'category-function'}">
+                                                ${task.project.category.name} (${task.project.category.type})
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">Timeline</h5>
+                                        <div class="mb-2">
+                                            <strong>Start Date:</strong> ${startDate}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Due Date:</strong> ${dueDate}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Created At:</strong> ${createdDate}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Updated At:</strong> ${updatedDate}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5 class="mb-3">Comments</h5>
+                            <div id="taskComments">
+                                <!-- Comments will be loaded dynamically -->
+                            </div>
+                            <form class="mt-3" id="addCommentForm">
+                                <div class="input-group">
+                                    <textarea class="form-control" placeholder="Add a comment..." rows="2" name="content" required></textarea>
+                                    <button class="btn btn-primary" type="submit">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+                    
+                    // Load comments
+                    loadComments(taskId);
+                    
+                    // Add comment form submission event
+                    document.getElementById('addCommentForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        addComment(taskId);
+                    });
+                    
+                    // Add edit icon event listener
+                    document.querySelector('.edit-icon').addEventListener('click', function() {
+                        const taskId = this.getAttribute('data-task-id');
+                        modal.hide();
+                        openEditTaskModal(taskId);
+                    });
+                    
+                    modal.show();
+                });
+        }
+        
+        function openEditTaskModal(taskId) {
+            fetch(`/api/tasks/${taskId}`)
+                .then(response => response.json())
+                .then(task => {
+                    const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                    
+                    // Populate form fields
+                    document.getElementById('editTaskId').value = task.id;
+                    document.getElementById('editTitle').value = task.title;
+                    document.getElementById('editDescription').value = task.description || '';
+                    document.getElementById('editType').value = task.type;
+                    document.getElementById('editPriority').value = task.priority;
+                    document.getElementById('editSeverity').value = task.severity;
+                    document.getElementById('editStatus').value = task.status;
+                    
+                    // Set dates
+                    if (task.start_date) {
+                        const startDate = new Date(task.start_date);
+                        document.getElementById('editStartDate').value = startDate.toISOString().slice(0, 16);
+                    } else {
+                        document.getElementById('editStartDate').value = '';
+                    }
+                    
+                    if (task.due_date) {
+                        const dueDate = new Date(task.due_date);
+                        document.getElementById('editDueDate').value = dueDate.toISOString().slice(0, 16);
+                    } else {
+                        document.getElementById('editDueDate').value = '';
+                    }
+                    
+                    // Set assignee
+                    if (task.assignee && task.assignee.id) {
+                        document.getElementById('editAssignee').value = task.assignee.id;
+                    } else {
+                        document.getElementById('editAssignee').value = '';
+                    }
+                    
+                    // Set project
+                    document.getElementById('editProject').value = task.project.id;
+                    
+                    modal.show();
+                });
+        }
+        
+        function saveTaskChanges() {
+            const form = document.getElementById('editTaskForm');
+            const formData = new FormData(form);
+            
+            const taskData = {
+                id: formData.get('id'),
+                title: formData.get('title'),
+                description: formData.get('description'),
+                type: formData.get('type'),
+                status: formData.get('status'),
+                priority: formData.get('priority'),
+                severity: formData.get('severity'),
+                project_id: parseInt(formData.get('project_id'))
+            };
+            
+            const assigneeId = formData.get('assignee_id');
+            if (assigneeId) {
+                taskData.assignee_id = parseInt(assigneeId);
+            } else {
+                taskData.assignee_id = null;
+            }
+            
+            const startDate = formData.get('start_date');
+            if (startDate) {
+                taskData.start_date = new Date(startDate).toISOString();
+            } else {
+                taskData.start_date = null;
+            }
+            
+            const dueDate = formData.get('due_date');
+            if (dueDate) {
+                taskData.due_date = new Date(dueDate).toISOString();
+            } else {
+                taskData.due_date = null;
+            }
+            
+            fetch(`/api/tasks/${taskData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to update task');
+            })
+            .then(data => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+                modal.hide();
+                
+                // Reload task list
+                loadTasks();
+                
+                alert('Task updated successfully!');
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        }
+        
+        function loadComments(taskId) {
+            fetch(`/api/tasks/${taskId}/comments`)
+                .then(response => response.json())
+                .then(comments => {
+                    const commentsContainer = document.getElementById('taskComments');
+                    commentsContainer.innerHTML = '';
+                    
+                    if (comments.length === 0) {
+                        commentsContainer.innerHTML = '<p class="text-muted">No comments yet</p>';
+                        return;
+                    }
+                    
+                    comments.forEach(comment => {
+                        const commentDate = new Date(comment.created_at).toLocaleString();
+                        const commentElement = document.createElement('div');
+                        commentElement.className = 'card mb-3';
+                        commentElement.innerHTML = `
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>${comment.author.username}</strong>
+                                    <small class="text-muted">${commentDate}</small>
+                                </div>
+                                <p class="mb-0">${comment.content}</p>
+                            </div>
+                        `;
+                        commentsContainer.appendChild(commentElement);
+                    });
+                });
+        }
+        
+        function addComment(taskId) {
+            const form = document.getElementById('addCommentForm');
+            const formData = new FormData(form);
+            const content = formData.get('content');
+            
+            fetch(`/api/tasks/${taskId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            })
+            .then(response => {
+                if (response.ok) {
+                    form.reset();
+                    loadComments(taskId);
+                } else {
+                    alert('Failed to add comment');
+                }
+            });
+        }
+        
+        function getPriorityClass(priority) {
+            switch(priority) {
+                case 'high': case 'urgent': return 'high-priority';
+                case 'medium': return 'medium-priority';
+                case 'low': return 'low-priority';
+                default: return '';
+            }
+        }
+        
+        function getPriorityText(priority) {
+            switch(priority) {
+                case 'low': return 'Low';
+                case 'medium': return 'Medium';
+                case 'high': return 'High';
+                case 'urgent': return 'Urgent';
+                default: return priority;
+            }
+        }
+        
+        function getSeverityClass(severity) {
+            switch(severity) {
+                case 'trivial': return 'bg-light text-dark';
+                case 'minor': return 'bg-info text-white';
+                case 'normal': return 'bg-primary text-white';
+                case 'major': return 'bg-warning text-dark';
+                case 'critical': return 'bg-danger text-white';
+                default: return 'bg-secondary text-white';
+            }
+        }
+        
+        function getSeverityText(severity) {
+            switch(severity) {
+                case 'trivial': return 'Trivial';
+                case 'minor': return 'Minor';
+                case 'normal': return 'Normal';
+                case 'major': return 'Major';
+                case 'critical': return 'Critical';
+                default: return severity;
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'todo': return 'status-todo';
+                case 'in_progress': return 'status-in_progress';
+                case 'review': return 'status-review';
+                case 'done': return 'status-done';
+                default: return '';
+            }
+        }
+        
+        function getStatusText(status) {
+            switch(status) {
+                case 'todo': return 'To Do';
+                case 'in_progress': return 'In Progress';
+                case 'review': return 'In Review';
+                case 'done': return 'Done';
+                default: return status;
+            }
+        }
+    </script>
+</body>
+</html>
