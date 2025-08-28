@@ -1,0 +1,98 @@
+[
+    {
+        "title": "Honda Compressor Communication Protocol Development",
+        "description": "Develop communication protocol for Honda 28M_800V_45CC project",
+        "type": "feature",
+        "status": "in_progress",
+        "priority": "high",
+        "severity": "major",
+        "start_date": "2024-02-01T00:00:00",
+        "due_date": "2024-05-31T00:00:00",
+        "assignee_username": "lilong.xu",
+        "project_name": "Honda 28M_800V_45CC",
+        "comments": [
+            {
+                "content": "Initial task setup and assignment completed.",
+                "author_username": "lilong.xu",
+                "created_at": "2024-01-15T00:00:00"
+            },
+            {
+                "content": "Protocol design phase completed. Moving to implementation.",
+                "author_username": "lilong.xu",
+                "created_at": "2024-03-10T00:00:00"
+            }
+        ]
+    },
+    {
+        "title": "Platform 400V Compressor Control Algorithm Optimization",
+        "description": "Optimize control algorithm for Platform_400V_36CC project",
+        "type": "improvement",
+        "status": "todo",
+        "priority": "medium",
+        "severity": "normal",
+        "start_date": "2024-03-15T00:00:00",
+        "due_date": "2024-06-30T00:00:00",
+        "assignee_username": "alex.zhu",
+        "project_name": "Platform_400V_36CC",
+        "comments": [
+            {
+                "content": "Task created and assigned to Alex Zhu.",
+                "author_username": "admin",
+                "created_at": "2024-02-20T00:00:00"
+            }
+        ]
+    },
+    {
+        "title": "Bootloader Security Verification",
+        "description": "Verify security mechanisms for Bootloader project",
+        "type": "test",
+        "status": "review",
+        "priority": "high",
+        "severity": "critical",
+        "start_date": "2024-01-15T00:00:00",
+        "due_date": "2024-04-30T00:00:00",
+        "assignee_username": "xin.guo",
+        "project_name": "Bootloader",
+        "comments": [
+            {
+                "content": "Initial design concepts created.",
+                "author_username": "xin.guo",
+                "created_at": "2024-01-20T00:00:00"
+            },
+            {
+                "content": "Design submitted for review.",
+                "author_username": "xin.guo",
+                "created_at": "2024-04-10T00:00:00"
+            },
+            {
+                "content": "Review in progress.",
+                "author_username": "admin",
+                "created_at": "2024-04-15T00:00:00"
+            }
+        ]
+    },
+    {
+        "title": "Cyber Security Vulnerability Fix",
+        "description": "Fix vulnerabilities found in CyberSecurity project",
+        "type": "bug",
+        "status": "in_progress",
+        "priority": "urgent",
+        "severity": "critical",
+        "start_date": "2024-03-01T00:00:00",
+        "due_date": "2024-03-31T00:00:00",
+        "assignee_username": "jordan.zhou",
+        "project_name": "CyberSecurity",
+        "comments": [
+            {
+                "content": "Task assigned to Jordan Zhou.",
+                "author_username": "admin",
+                "created_at": "2024-02-28T00:00:00"
+            },
+            {
+                "content": "Working on the fix.",
+                "author_username": "jordan.zhou",
+                "created_at": "2024-03-05T00:00:00"
+            }
+        ]
+    }
+]

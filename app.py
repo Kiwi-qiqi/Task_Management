@@ -1,9 +1,13 @@
 # app.py
+from flask.cli import with_appcontext
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from models import db, User, Category, Project, Task, Comment
+from sqlalchemy.orm import joinedload
 from datetime import datetime
+import os
 import json
+import click
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -51,35 +55,79 @@ def logout():
 @app.route('/api/tasks')
 @login_required
 def get_tasks():
-    # Get query parameters
-    status = request.args.get('status')
-    assignee = request.args.get('assignee')
-    project = request.args.get('project')
+    # Get all query parameters
+    status = request.args.get('status', 'all')
+    assignee = request.args.get('assignee', 'all')
+    project = request.args.get('project', 'all')
+    priority = request.args.get('priority', 'all')
+    text = request.args.get('text', '').lower()
     
-    # Build query
-    query = Task.query
+    # Build base query with eager loading
+    query = Task.query.options(
+        joinedload(Task.assignee),
+        joinedload(Task.project).joinedload(Project.category),
+        joinedload(Task.comments).joinedload(Comment.author)
+    ).order_by(Task.due_date.asc())
     
-    if status and status != 'all':
-        query = query.filter_by(status=status)
-    if assignee and assignee != 'all':
-        query = query.filter_by(assignee_id=assignee)
-    if project and project != 'all':
-        query = query.filter_by(project_id=project)
+    # Apply filters
+    if status != 'all':
+        query = query.filter(Task.status == status)
+    if assignee != 'all':
+        query = query.filter(Task.assignee_id == assignee)
+    if project != 'all':
+        query = query.filter(Task.project_id == project)
+    if priority != 'all':
+        query = query.filter(Task.priority == priority)
     
-    tasks = query.order_by(Task.due_date.asc()).all()
+    # Execute query
+    tasks = query.all()
+    
+    # Apply text search filter (case-insensitive)
+    if text:
+        filtered_tasks = []
+        for task in tasks:
+            # Extract text fields to search
+            search_fields = [
+                task.title,
+                task.description or "",
+                task.project.name,
+                task.assignee.full_name if task.assignee else "",
+                task.assignee.username if task.assignee else ""
+            ]
+            
+            # Check if any field contains the search text
+            if any(text in field.lower() for field in search_fields):
+                filtered_tasks.append(task)
+        tasks = filtered_tasks
     
     # Convert to JSON format
     tasks_data = []
     for task in tasks:
+        comments = []
+        for comment in task.comments:
+            comments.append({
+                'id': comment.id,
+                'content': comment.content,
+                'author': {
+                    'id': comment.author.id,
+                    'username': comment.author.username,
+                    'full_name': comment.author.full_name
+                },
+                'date': comment.created_at.strftime('%Y-%m-%d')  # Only date part
+            })
+        
         task_data = {
             'id': task.id,
             'title': task.title,
             'description': task.description,
+            'type': task.type.value if task.type else None,
             'status': task.status,
             'priority': task.priority,
-            'severity': task.severity,
+            'severity': task.severity.value if task.severity else None,
             'start_date': task.start_date.isoformat() if task.start_date else None,
             'due_date': task.due_date.isoformat() if task.due_date else None,
+            'created_at': task.created_at.isoformat(),
+            'updated_at': task.updated_at.isoformat(),
             'assignee': {
                 'id': task.assignee.id if task.assignee else None,
                 'username': task.assignee.username if task.assignee else 'Unassigned',
@@ -94,7 +142,7 @@ def get_tasks():
                     'type': task.project.category.type
                 }
             },
-            'comment_count': len(task.comments)
+            'comments': comments
         }
         tasks_data.append(task_data)
     
@@ -302,86 +350,79 @@ def get_users():
     
     return jsonify(users_data)
 
-if __name__ == '__main__':
-    with app.app_context():
+
+# 注册自定义命令行命令
+def register_commands(app):
+    @app.cli.command("init-db")
+    @with_appcontext
+    def init_db_command():
+        """Initialize the database tables."""
         db.create_all()
-        
-        # Create default admin user (if not exists)
-        if not User.query.filter_by(username='admin').first():
-            admin = User(
-                username='admin', 
-                email='admin@example.com', 
-                role='admin',
-                full_name='System Administrator',
-                site='MATS',
-                competency='System Management',
-                title='System Administrator',
-                mobile='00000000000'
-            )
-            admin.set_password('admin123')
-            db.session.add(admin)
-        
-        # Add employee data (if not exists)
-        employees = [
-            {'username': 'lilong.xu', 'email': 'lilong.xu@mahle.com', 'full_name': 'Lilong Xu',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Manager', 'mobile': '18114906812'},
-            {'username': 'alex.zhu', 'email': 'alex.zhu@mahle.com', 'full_name': 'Alex Zhu',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '15850690925'},
-            {'username': 'xin.guo', 'email': 'xin.guo@mahle.com', 'full_name': 'Xin Guo',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': ''},
-            {'username': 'jordan.zhou', 'email': 'jordan.zhou@mahle.com', 'full_name': 'Jordan Zhou',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '15751018155'},
-            {'username': 'mingyu.ma', 'email': 'mingyu.ma@mahle.com', 'full_name': 'Mingyu Ma',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '17315372380'},
-            {'username': 'alex.li', 'email': 'alex.a.li@mahle.com', 'full_name': 'Alex Li',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '18503397615'},
-            {'username': 'feihao.liu', 'email': 'feihao.liu@mahle.com', 'full_name': 'Feihao Liu',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '17768046903'},
-            {'username': 'libo.zhu', 'email': 'libo.zhu@mahle.com', 'full_name': 'Libo Zhu',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '18651181168'},
-            {'username': 'bin.huang', 'email': 'bin.b.huang@mahle.com', 'full_name': 'Bin Huang',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': ''},
-            {'username': 'stephen.zeng', 'email': 'stephen.zeng@mahle.com', 'full_name': 'Stephen Zeng',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '18166038355'},
-            {'username': 'jason.zhang', 'email': 'jason.c.zhang@mahle.com', 'full_name': 'Jason Zhang',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '18993573429'},
-            {'username': 'min.xiong', 'email': 'min.xiong@mahle.com', 'full_name': 'Min Xiong',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '13313843160'},
-            {'username': 'shenglin.chen', 'email': 'shenglin.chen@mahle.com', 'full_name': 'Shenglin Chen',
-             'site': 'MATS', 'competency': 'SW', 'title': 'Software Engineer', 'mobile': '18662237910'}
-        ]
-        
-        for emp in employees:
-            if not User.query.filter_by(username=emp['username']).first():
-                employee = User(
-                    username=emp['username'],
-                    email=emp['email'],
-                    role='employee',
-                    full_name=emp['full_name'],
-                    site=emp['site'],
-                    competency=emp['competency'],
-                    title=emp['title'],
-                    mobile=emp['mobile']
-                )
-                # Set default password for all employees
-                employee.set_password('password123')
-                db.session.add(employee)
-        
-        # Create categories (products and functions)
-        if not Category.query.first():
-            categories = [
-                {'name': 'E-Compressor', 'type': 'product', 'description': 'Electric Compressor'},
-                {'name': 'E-CoolingPump', 'type': 'product', 'description': 'Electric Cooling Pump'},
-                {'name': 'E-CoolingFan', 'type': 'product', 'description': 'Electric Cooling Fan'},
-                {'name': 'OBC&DCLV', 'type': 'product', 'description': 'On-Board Charger & DC Low Voltage Converter'},
-                {'name': 'Bootloader', 'type': 'function', 'description': 'Bootloader functionality'},
-                {'name': 'Functional Safety', 'type': 'function', 'description': 'Functional Safety'},
-                {'name': 'CyberSecurity', 'type': 'function', 'description': 'Cyber Security'},
-                {'name': 'Toolchain', 'type': 'function', 'description': 'Toolchain'},
-                {'name': 'Main Task', 'type': 'function', 'description': 'Main Task'}
-            ]
+        click.echo("Database tables created.")
+
+    @app.cli.command("seed-db")
+    @with_appcontext
+    def seed_db_command():
+        """Add seed data to the database."""
+        add_seed_data()
+        click.echo("Seed data added to database.")
+
+# 单独的假数据创建函数
+def add_seed_data():
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    
+    # 创建默认admin用户 (如果不存在)
+    if not User.query.filter_by(username='admin').first():
+        admin = User(
+            username='admin', 
+            email='admin@example.com', 
+            role='admin',
+            full_name='System Administrator',
+            site='MATS',
+            competency='System Management',
+            title='System Administrator',
+            mobile='00000000000'
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        click.echo("Admin user created")
+    
+    # 从JSON文件加载员工数据
+    if not User.query.filter(User.username != 'admin').first():
+        employees_path = os.path.join(base_dir, 'data_demo', 'employees.json')
+        if os.path.exists(employees_path):
+            with open(employees_path, 'r') as f:
+                employees_data = json.load(f)
             
-            for cat in categories:
+            for emp in employees_data:
+                if not User.query.filter_by(username=emp['username']).first():
+                    employee = User(
+                        username=emp['username'],
+                        email=emp['email'],
+                        role='employee',
+                        full_name=emp['full_name'],
+                        site=emp['site'],
+                        competency=emp['competency'],
+                        title=emp['title'],
+                        mobile=emp['mobile']
+                    )
+                    employee.set_password('password123')
+                    db.session.add(employee)
+            
+            db.session.commit()
+            click.echo(f"{len(employees_data)} employees created from JSON")
+        else:
+            click.echo("Employees JSON file not found.")
+    
+    # 从JSON文件加载类别
+    if not Category.query.first():
+        categories_path = os.path.join(base_dir, 'data_demo', 'categories.json')
+        if os.path.exists(categories_path):
+            with open(categories_path, 'r') as f:
+                categories_data = json.load(f)
+            
+            for cat in categories_data:
                 category = Category(
                     name=cat['name'],
                     type=cat['type'],
@@ -389,116 +430,105 @@ if __name__ == '__main__':
                 )
                 db.session.add(category)
             db.session.commit()
-        
-        # Create projects
-        if not Project.query.first():
+            click.echo(f"{len(categories_data)} categories created from JSON")
+        else:
+            click.echo("Categories JSON file not found.")
+    
+    # 从JSON文件加载项目
+    if not Project.query.first():
+        projects_path = os.path.join(base_dir, 'data_demo', 'projects.json')
+        if os.path.exists(projects_path):
+            with open(projects_path, 'r') as f:
+                projects_data = json.load(f)
+            
             categories = Category.query.all()
             category_map = {cat.name: cat.id for cat in categories}
             
-            projects = [
-                {'name': 'Honda 28M_800V_45CC', 'category': 'E-Compressor', 'main_rd': 'Outsourced', 'supplier': 'HET', 'status': 'in_progress'},
-                {'name': 'Platform_400V_36CC', 'category': 'E-Compressor', 'main_rd': 'Outsourced', 'supplier': 'FristWise', 'status': 'in_progress'},
-                {'name': 'Platform_800V_45CC', 'category': 'E-Compressor', 'main_rd': 'Outsourced', 'supplier': 'FeiYang', 'status': 'in_progress'},
-                {'name': 'STELLANTIS_400V_45CC', 'category': 'E-Compressor', 'main_rd': 'TBD', 'supplier': '', 'status': 'not_start'},
-                {'name': 'VW_800V_45CC', 'category': 'E-Compressor', 'main_rd': 'Internal', 'supplier': '', 'status': 'not_start'},
-                {'name': 'HD20_800V_57CC', 'category': 'E-Compressor', 'main_rd': 'Internal', 'supplier': '', 'status': 'in_progress'},
-                {'name': 'Platform_Ti', 'category': 'E-Compressor', 'main_rd': 'Internal', 'supplier': '', 'status': 'in_progress'},
-                {'name': 'HR18', 'category': 'E-CoolingPump', 'main_rd': 'Internal', 'supplier': '', 'status': 'in_progress'},
-                {'name': 'XCSP', 'category': 'E-CoolingPump', 'main_rd': 'Internal', 'supplier': '', 'status': 'in_progress'},
-                {'name': 'Platform_800V_2IN1_7kw', 'category': 'OBC&DCLV', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'Platform_48V_DCLV_5kw', 'category': 'OBC&DCLV', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'MMC_400V_3IN1_11kw', 'category': 'OBC&DCLV', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'Bootloader', 'category': 'Bootloader', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'Functional Safety', 'category': 'Functional Safety', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'CyberSecurity', 'category': 'CyberSecurity', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'Toolchain', 'category': 'Toolchain', 'main_rd': '', 'supplier': '', 'status': ''},
-                {'name': 'Main Task', 'category': 'Main Task', 'main_rd': '', 'supplier': '', 'status': ''}
-            ]
-            
-            for proj in projects:
+            for proj in projects_data:
+                # 获取类别ID
+                category_id = category_map.get(proj['category'])
+                if not category_id:
+                    click.echo(f"Category {proj['category']} not found for project {proj['name']}")
+                    continue
+                    
                 project = Project(
                     name=proj['name'],
-                    category_id=category_map[proj['category']],
+                    category_id=category_id,
                     main_rd=proj['main_rd'],
                     supplier=proj['supplier'],
                     status=proj['status'] if proj['status'] else 'planning'
                 )
                 db.session.add(project)
             db.session.commit()
-        
-        # Create sample tasks
-        if not Task.query.first():
-            # Get some employees and projects
-            employees = User.query.filter_by(role='employee').all()
-            projects = Project.query.all()
-            
-            tasks = [
-                {
-                    'title': 'Honda Compressor Communication Protocol Development',
-                    'description': 'Develop communication protocol for Honda 28M_800V_45CC project',
-                    'type': 'feature',
-                    'status': 'in_progress',
-                    'priority': 'high',
-                    'severity': 'major',
-                    'start_date': datetime(2024, 2, 1),
-                    'due_date': datetime(2024, 5, 31),
-                    'assignee_id': employees[0].id,
-                    'project_id': projects[0].id
-                },
-                {
-                    'title': 'Platform 400V Compressor Control Algorithm Optimization',
-                    'description': 'Optimize control algorithm for Platform_400V_36CC project',
-                    'type': 'improvement',
-                    'status': 'todo',
-                    'priority': 'medium',
-                    'severity': 'normal',
-                    'start_date': datetime(2024, 3, 15),
-                    'due_date': datetime(2024, 6, 30),
-                    'assignee_id': employees[1].id,
-                    'project_id': projects[1].id
-                },
-                {
-                    'title': 'Bootloader Security Verification',
-                    'description': 'Verify security mechanisms for Bootloader project',
-                    'type': 'test',
-                    'status': 'review',
-                    'priority': 'high',
-                    'severity': 'critical',
-                    'start_date': datetime(2024, 1, 15),
-                    'due_date': datetime(2024, 4, 30),
-                    'assignee_id': employees[2].id,
-                    'project_id': projects[13].id
-                },
-                {
-                    'title': 'Cyber Security Vulnerability Fix',
-                    'description': 'Fix vulnerabilities found in CyberSecurity project',
-                    'type': 'bug',
-                    'status': 'in_progress',
-                    'priority': 'urgent',
-                    'severity': 'critical',
-                    'start_date': datetime(2024, 3, 1),
-                    'due_date': datetime(2024, 3, 31),
-                    'assignee_id': employees[3].id,
-                    'project_id': projects[15].id
-                }
-            ]
-            
-            for task_data in tasks:
-                task = Task(**task_data)
-                db.session.add(task)
-            
-            db.session.commit()
-            
-            # Add comments to some tasks
-            tasks = Task.query.all()
-            for i, task in enumerate(tasks):
-                comment = Comment(
-                    content=f'Initial comment for task #{i+1}. Task created and assigned to relevant personnel.',
-                    task_id=task.id,
-                    author_id=1  # admin
-                )
-                db.session.add(comment)
-            
-            db.session.commit()
+            click.echo(f"{len(projects_data)} projects created from JSON")
+        else:
+            click.echo("Projects JSON file not found.")
     
+    # 从JSON文件加载任务（包括评论）
+    if not Task.query.first():
+        tasks_path = os.path.join(base_dir, 'data_demo', 'tasks.json')
+        if os.path.exists(tasks_path):
+            with open(tasks_path, 'r') as f:
+                tasks_data = json.load(f)
+            
+            # 创建用户名到用户ID的映射
+            user_map = {user.username: user.id for user in User.query.all()}
+            # 创建项目名称到项目ID的映射
+            project_map = {project.name: project.id for project in Project.query.all()}
+            
+            for task_data in tasks_data:
+                # 获取分配人ID
+                assignee_id = user_map.get(task_data['assignee_username'])
+                if not assignee_id:
+                    click.echo(f"Assignee {task_data['assignee_username']} not found for task {task_data['title']}")
+                    continue
+                
+                # 获取项目ID
+                project_id = project_map.get(task_data['project_name'])
+                if not project_id:
+                    click.echo(f"Project {task_data['project_name']} not found for task {task_data['title']}")
+                    continue
+                
+                # 创建任务
+                task = Task(
+                    title=task_data['title'],
+                    description=task_data['description'],
+                    type=task_data['type'],
+                    status=task_data['status'],
+                    priority=task_data['priority'],
+                    severity=task_data['severity'],
+                    start_date=datetime.fromisoformat(task_data['start_date']),
+                    due_date=datetime.fromisoformat(task_data['due_date']),
+                    assignee_id=assignee_id,
+                    project_id=project_id
+                )
+                db.session.add(task)
+                db.session.flush()  # 获取任务ID
+                
+                # 添加评论
+                for comment_data in task_data.get('comments', []):
+                    author_id = user_map.get(comment_data['author_username'])
+                    if not author_id:
+                        click.echo(f"Author {comment_data['author_username']} not found for comment in task {task_data['title']}")
+                        continue
+                    
+                    comment = Comment(
+                        content=comment_data['content'],
+                        task_id=task.id,
+                        author_id=author_id,
+                        created_at=datetime.fromisoformat(comment_data['created_at'])
+                    )
+                    db.session.add(comment)
+            
+            db.session.commit()
+            click.echo(f"{len(tasks_data)} tasks with comments created from JSON")
+        else:
+            click.echo("Tasks JSON file not found.")
+
+# 主函数
+if __name__ == '__main__':
+    # 注册命令行命令
+    register_commands(app)
+    
+    # 运行应用
     app.run(debug=True)

@@ -1,0 +1,47 @@
+[
+    {
+        "name": "E-Compressor",
+        "type": "product",
+        "description": "Electric Compressor"
+    },
+    {
+        "name": "E-CoolingPump",
+        "type": "product",
+        "description": "Electric Cooling Pump"
+    },
+    {
+        "name": "E-CoolingFan",
+        "type": "product",
+        "description": "Electric Cooling Fan"
+    },
+    {
+        "name": "OBC&DCLV",
+        "type": "product",
+        "description": "On-Board Charger & DC Low Voltage Converter"
+    },
+    {
+        "name": "Bootloader",
+        "type": "function",
+        "description": "Bootloader functionality"
+    },
+    {
+        "name": "Functional Safety",
+        "type": "function",
+        "description": "Functional Safety"
+    },
+    {
+        "name": "CyberSecurity",
+        "type": "function",
+        "description": "Cyber Security"
+    },
+    {
+        "name": "Toolchain",
+        "type": "function",
+        "description": "Toolchain"
+    },
+    {
+        "name": "Main Task",
+        "type": "function",
+        "description": "Main Task"
+    }
+]

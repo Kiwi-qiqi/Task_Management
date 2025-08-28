@@ -1,0 +1,121 @@
+[
+    {
+        "name": "Honda 28M_800V_45CC",
+        "category": "E-Compressor",
+        "main_rd": "Outsourced",
+        "supplier": "HET",
+        "status": "in_progress"
+    },
+    {
+        "name": "Platform_400V_36CC",
+        "category": "E-Compressor",
+        "main_rd": "Outsourced",
+        "supplier": "FristWise",
+        "status": "in_progress"
+    },
+    {
+        "name": "Platform_800V_45CC",
+        "category": "E-Compressor",
+        "main_rd": "Outsourced",
+        "supplier": "FeiYang",
+        "status": "in_progress"
+    },
+    {
+        "name": "STELLANTIS_400V_45CC",
+        "category": "E-Compressor",
+        "main_rd": "TBD",
+        "supplier": "",
+        "status": "not_start"
+    },
+    {
+        "name": "VW_800V_45CC",
+        "category": "E-Compressor",
+        "main_rd": "Internal",
+        "supplier": "",
+        "status": "not_start"
+    },
+    {
+        "name": "HD20_800V_57CC",
+        "category": "E-Compressor",
+        "main_rd": "Internal",
+        "supplier": "",
+        "status": "in_progress"
+    },
+    {
+        "name": "Platform_Ti",
+        "category": "E-Compressor",
+        "main_rd": "Internal",
+        "supplier": "",
+        "status": "in_progress"
+    },
+    {
+        "name": "HR18",
+        "category": "E-CoolingPump",
+        "main_rd": "Internal",
+        "supplier": "",
+        "status": "in_progress"
+    },
+    {
+        "name": "XCSP",
+        "category": "E-CoolingPump",
+        "main_rd": "Internal",
+        "supplier": "",
+        "status": "in_progress"
+    },
+    {
+        "name": "Platform_800V_2IN1_7kw",
+        "category": "OBC&DCLV",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "Platform_48V_DCLV_5kw",
+        "category": "OBC&DCLV",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "MMC_400V_3IN1_11kw",
+        "category": "OBC&DCLV",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "Bootloader",
+        "category": "Bootloader",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "Functional Safety",
+        "category": "Functional Safety",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "CyberSecurity",
+        "category": "CyberSecurity",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "Toolchain",
+        "category": "Toolchain",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    },
+    {
+        "name": "Main Task",
+        "category": "Main Task",
+        "main_rd": "",
+        "supplier": "",
+        "status": ""
+    }
+]

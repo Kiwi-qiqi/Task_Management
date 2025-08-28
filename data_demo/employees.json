@@ -1,0 +1,119 @@
+[
+    {
+        "username": "lilong.xu",
+        "email": "lilong.xu@mahle.com",
+        "full_name": "Lilong Xu",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Manager",
+        "mobile": "18114906812"
+    },
+    {
+        "username": "alex.zhu",
+        "email": "alex.zhu@mahle.com",
+        "full_name": "Alex Zhu",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "15850690925"
+    },
+    {
+        "username": "xin.guo",
+        "email": "xin.guo@mahle.com",
+        "full_name": "Xin Guo",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": ""
+    },
+    {
+        "username": "jordan.zhou",
+        "email": "jordan.zhou@mahle.com",
+        "full_name": "Jordan Zhou",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "15751018155"
+    },
+    {
+        "username": "mingyu.ma",
+        "email": "mingyu.ma@mahle.com",
+        "full_name": "Mingyu Ma",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "17315372380"
+    },
+    {
+        "username": "alex.li",
+        "email": "alex.a.li@mahle.com",
+        "full_name": "Alex Li",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "18503397615"
+    },
+    {
+        "username": "feihao.liu",
+        "email": "feihao.liu@mahle.com",
+        "full_name": "Feihao Liu",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "17768046903"
+    },
+    {
+        "username": "libo.zhu",
+        "email": "libo.zhu@mahle.com",
+        "full_name": "Libo Zhu",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "18651181168"
+    },
+    {
+        "username": "bin.huang",
+        "email": "bin.b.huang@mahle.com",
+        "full_name": "Bin Huang",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": ""
+    },
+    {
+        "username": "stephen.zeng",
+        "email": "stephen.zeng@mahle.com",
+        "full_name": "Stephen Zeng",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "18166038355"
+    },
+    {
+        "username": "jason.zhang",
+        "email": "jason.c.zhang@mahle.com",
+        "full_name": "Jason Zhang",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "18993573429"
+    },
+    {
+        "username": "min.xiong",
+        "email": "min.xiong@mahle.com",
+        "full_name": "Min Xiong",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "13313843160"
+    },
+    {
+        "username": "shenglin.chen",
+        "email": "shenglin.chen@mahle.com",
+        "full_name": "Shenglin Chen",
+        "site": "MATS",
+        "competency": "SW",
+        "title": "Software Engineer",
+        "mobile": "18662237910"
+    }
+]

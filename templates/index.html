@@ -811,7 +811,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Assignee</label>
                                     <select class="form-select" name="assignee_id" id="assigneeSelect">
-                                        <option value="">Unassigned</option>
+                                        <!-- <option value="">Unassigned</option> -->
                                         <!-- Dynamically populated -->
                                     </select>
                                 </div>
@@ -957,8 +957,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let tasks = [];
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+
             // Load initial data
             loadUsers();
             loadProjects();
@@ -1001,292 +1003,300 @@
             { id: 13, name: "Toolchain", category: "Function" },
             { id: 14, name: "Main Task", category: "Function" }
         ];
-
-        let tasks = [
-            {
-                id: 1,
-                title: 'ECU Communication Module Development',
-                description: 'Develop communication protocol for Honda 28M_800V_45CC project',
-                type: 'feature',
-                status: 'in_progress',
-                priority: 'high',
-                severity: 'major',
-                start_date: '2024-02-01',
-                due_date: '2024-05-31',
-                created_at: '2024-01-15',
-                updated_at: '2024-04-20',
-                assignee: users[0],
-                project: projects[0],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Initial task setup and assignment completed.',
-                        author: users[0],
-                        date: '2024-01-15'
-                    },
-                    {
-                        id: 2,
-                        content: 'Protocol design phase completed. Moving to implementation.',
-                        author: users[0],
-                        date: '2024-03-10'
-                    }
-                ]
-            },
-            {
-                id: 2,
-                title: 'BMS Data Collection Optimization',
-                description: 'Optimize battery data collection algorithm for Platform_400V_36CC project',
-                type: 'improvement',
-                status: 'todo',
-                priority: 'medium',
-                severity: 'normal',
-                start_date: '2024-03-15',
-                due_date: '2024-06-30',
-                created_at: '2024-02-20',
-                updated_at: '2024-03-01',
-                assignee: users[1],
-                project: projects[1],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Task created and assigned to Alex Zhu.',
-                        author: users[0],
-                        date: '2024-02-20'
-                    }
-                ]
-            },
-            {
-                id: 3,
-                title: 'ECU UI Interface Design',
-                description: 'Design user interface for ECU controller',
-                type: 'design',
-                status: 'review',
-                priority: 'medium',
-                severity: 'normal',
-                start_date: '2024-01-15',
-                due_date: '2024-04-30',
-                created_at: '2023-12-10',
-                updated_at: '2024-04-15',
-                assignee: users[2],
-                project: projects[0],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Initial design concepts created.',
-                        author: users[2],
-                        date: '2024-01-20'
-                    },
-                    {
-                        id: 2,
-                        content: 'Design submitted for review.',
-                        author: users[2],
-                        date: '2024-04-10'
-                    },
-                    {
-                        id: 3,
-                        content: 'Review in progress.',
-                        author: users[0],
-                        date: '2024-04-15'
-                    }
-                ]
-            },
-            {
-                id: 4,
-                title: 'BMS Security Vulnerability Fix',
-                description: 'Fix security vulnerabilities found in battery management system',
-                type: 'bug',
-                status: 'in_progress',
-                priority: 'urgent',
-                severity: 'critical',
-                start_date: '2024-03-01',
-                due_date: '2024-03-31',
-                created_at: '2024-02-28',
-                updated_at: '2024-03-15',
-                assignee: users[3],
-                project: projects[1],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Critical vulnerability identified. Immediate action required.',
-                        author: users[0],
-                        date: '2024-02-28'
-                    },
-                    {
-                        id: 2,
-                        content: 'Working on patch development.',
-                        author: users[3],
-                        date: '2024-03-05'
-                    },
-                    {
-                        id: 3,
-                        content: 'Patch development completed. Starting testing phase.',
-                        author: users[3],
-                        date: '2024-03-15'
-                    }
-                ]
-            },
-            {
-                id: 5,
-                title: 'Bootloader Security Verification',
-                description: 'Verify security mechanisms for Bootloader project',
-                type: 'test',
-                status: 'review',
-                priority: 'high',
-                severity: 'critical',
-                start_date: '2024-01-15',
-                due_date: '2024-04-30',
-                created_at: '2023-12-20',
-                updated_at: '2024-04-20',
-                assignee: users[4],
-                project: projects[9],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Security testing initiated.',
-                        author: users[4],
-                        date: '2024-01-20'
-                    },
-                    {
-                        id: 2,
-                        content: 'Initial test results show vulnerabilities.',
-                        author: users[4],
-                        date: '2024-02-15'
-                    },
-                    {
-                        id: 3,
-                        content: 'Vulnerabilities addressed. Final verification in progress.',
-                        author: users[4],
-                        date: '2024-04-15'
-                    }
-                ]
-            },
-            {
-                id: 6,
-                title: 'Functional Safety Compliance',
-                description: 'Ensure compliance with functional safety standards',
-                type: 'compliance',
-                status: 'in_progress',
-                priority: 'high',
-                severity: 'major',
-                start_date: '2024-02-10',
-                due_date: '2024-06-15',
-                created_at: '2024-01-25',
-                updated_at: '2024-04-10',
-                assignee: users[5],
-                project: projects[10],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Compliance requirements documented.',
-                        author: users[5],
-                        date: '2024-02-15'
-                    },
-                    {
-                        id: 2,
-                        content: 'Implementation of safety mechanisms started.',
-                        author: users[5],
-                        date: '2024-03-20'
-                    }
-                ]
-            },
-            {
-                id: 7,
-                title: 'Toolchain Optimization',
-                description: 'Optimize development toolchain for better performance',
-                type: 'improvement',
-                status: 'todo',
-                priority: 'medium',
-                severity: 'normal',
-                start_date: '2024-05-01',
-                due_date: '2024-07-31',
-                created_at: '2024-04-01',
-                updated_at: '2024-04-01',
-                assignee: users[6],
-                project: projects[12],
-                comments: [
-                    {
-                        id: 1,
-                        content: 'Task created and assigned.',
-                        author: users[0],
-                        date: '2024-04-01'
-                    }
-                ]
-            }
-        ];
+            
+        // let tasks = [
+        //     {
+        //         id: 1,
+        //         title: 'ECU Communication Module Development',
+        //         description: 'Develop communication protocol for Honda 28M_800V_45CC project',
+        //         type: 'feature',
+        //         status: 'in_progress',
+        //         priority: 'high',
+        //         severity: 'major',
+        //         start_date: '2024-02-01',
+        //         due_date: '2024-05-31',
+        //         created_at: '2024-01-15',
+        //         updated_at: '2024-04-20',
+        //         assignee: users[0],
+        //         project: projects[0],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Initial task setup and assignment completed.',
+        //                 author: users[0],
+        //                 date: '2024-01-15'
+        //             },
+        //             {
+        //                 id: 2,
+        //                 content: 'Protocol design phase completed. Moving to implementation.',
+        //                 author: users[0],
+        //                 date: '2024-03-10'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 2,
+        //         title: 'BMS Data Collection Optimization',
+        //         description: 'Optimize battery data collection algorithm for Platform_400V_36CC project',
+        //         type: 'improvement',
+        //         status: 'todo',
+        //         priority: 'medium',
+        //         severity: 'normal',
+        //         start_date: '2024-03-15',
+        //         due_date: '2024-06-30',
+        //         created_at: '2024-02-20',
+        //         updated_at: '2024-03-01',
+        //         assignee: users[1],
+        //         project: projects[1],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Task created and assigned to Alex Zhu.',
+        //                 author: users[0],
+        //                 date: '2024-02-20'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 3,
+        //         title: 'ECU UI Interface Design',
+        //         description: 'Design user interface for ECU controller',
+        //         type: 'design',
+        //         status: 'review',
+        //         priority: 'medium',
+        //         severity: 'normal',
+        //         start_date: '2024-01-15',
+        //         due_date: '2024-04-30',
+        //         created_at: '2023-12-10',
+        //         updated_at: '2024-04-15',
+        //         assignee: users[2],
+        //         project: projects[0],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Initial design concepts created.',
+        //                 author: users[2],
+        //                 date: '2024-01-20'
+        //             },
+        //             {
+        //                 id: 2,
+        //                 content: 'Design submitted for review.',
+        //                 author: users[2],
+        //                 date: '2024-04-10'
+        //             },
+        //             {
+        //                 id: 3,
+        //                 content: 'Review in progress.',
+        //                 author: users[0],
+        //                 date: '2024-04-15'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 4,
+        //         title: 'BMS Security Vulnerability Fix',
+        //         description: 'Fix security vulnerabilities found in battery management system',
+        //         type: 'bug',
+        //         status: 'in_progress',
+        //         priority: 'urgent',
+        //         severity: 'critical',
+        //         start_date: '2024-03-01',
+        //         due_date: '2024-03-31',
+        //         created_at: '2024-02-28',
+        //         updated_at: '2024-03-15',
+        //         assignee: users[3],
+        //         project: projects[1],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Critical vulnerability identified. Immediate action required.',
+        //                 author: users[0],
+        //                 date: '2024-02-28'
+        //             },
+        //             {
+        //                 id: 2,
+        //                 content: 'Working on patch development.',
+        //                 author: users[3],
+        //                 date: '2024-03-05'
+        //             },
+        //             {
+        //                 id: 3,
+        //                 content: 'Patch development completed. Starting testing phase.',
+        //                 author: users[3],
+        //                 date: '2024-03-15'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 5,
+        //         title: 'Bootloader Security Verification',
+        //         description: 'Verify security mechanisms for Bootloader project',
+        //         type: 'test',
+        //         status: 'review',
+        //         priority: 'high',
+        //         severity: 'critical',
+        //         start_date: '2024-01-15',
+        //         due_date: '2024-04-30',
+        //         created_at: '2023-12-20',
+        //         updated_at: '2024-04-20',
+        //         assignee: users[4],
+        //         project: projects[9],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Security testing initiated.',
+        //                 author: users[4],
+        //                 date: '2024-01-20'
+        //             },
+        //             {
+        //                 id: 2,
+        //                 content: 'Initial test results show vulnerabilities.',
+        //                 author: users[4],
+        //                 date: '2024-02-15'
+        //             },
+        //             {
+        //                 id: 3,
+        //                 content: 'Vulnerabilities addressed. Final verification in progress.',
+        //                 author: users[4],
+        //                 date: '2024-04-15'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 6,
+        //         title: 'Functional Safety Compliance',
+        //         description: 'Ensure compliance with functional safety standards',
+        //         type: 'compliance',
+        //         status: 'in_progress',
+        //         priority: 'high',
+        //         severity: 'major',
+        //         start_date: '2024-02-10',
+        //         due_date: '2024-06-15',
+        //         created_at: '2024-01-25',
+        //         updated_at: '2024-04-10',
+        //         assignee: users[5],
+        //         project: projects[10],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Compliance requirements documented.',
+        //                 author: users[5],
+        //                 date: '2024-02-15'
+        //             },
+        //             {
+        //                 id: 2,
+        //                 content: 'Implementation of safety mechanisms started.',
+        //                 author: users[5],
+        //                 date: '2024-03-20'
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         id: 7,
+        //         title: 'Toolchain Optimization',
+        //         description: 'Optimize development toolchain for better performance',
+        //         type: 'improvement',
+        //         status: 'todo',
+        //         priority: 'medium',
+        //         severity: 'normal',
+        //         start_date: '2024-05-01',
+        //         due_date: '2024-07-31',
+        //         created_at: '2024-04-01',
+        //         updated_at: '2024-04-01',
+        //         assignee: users[6],
+        //         project: projects[12],
+        //         comments: [
+        //             {
+        //                 id: 1,
+        //                 content: 'Task created and assigned.',
+        //                 author: users[0],
+        //                 date: '2024-04-01'
+        //             }
+        //         ]
+        //     }
+        // ];
 
         function loadUsers() {
-            const assigneeFilter = document.getElementById('assigneeFilter');
-            const assigneeSelect = document.getElementById('assigneeSelect');
-            const editAssignee = document.getElementById('editAssignee');
-            
-            // Clear existing options (keep first option)
-            while (assigneeFilter.options.length > 1) {
-                assigneeFilter.remove(1);
-            }
-            while (assigneeSelect.options.length > 1) {
-                assigneeSelect.remove(1);
-            }
-            while (editAssignee.options.length > 1) {
-                editAssignee.remove(1);
-            }
-            
-            // Add user options
-            users.forEach(user => {
-                // Add to filter dropdown
-                const filterOption = document.createElement('option');
-                filterOption.value = user.id;
-                filterOption.textContent = user.name;
-                assigneeFilter.appendChild(filterOption);
-                
-                // Add to create task dropdown
-                const selectOption = document.createElement('option');
-                selectOption.value = user.id;
-                selectOption.textContent = user.name;
-                assigneeSelect.appendChild(selectOption);
-                
-                // Add to edit task dropdown
-                const editOption = document.createElement('option');
-                editOption.value = user.id;
-                editOption.textContent = user.name;
-                editAssignee.appendChild(editOption);
-            });
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const assigneeFilter = document.getElementById('assigneeFilter');
+                    const assigneeSelect = document.getElementById('assigneeSelect');
+                    const editAssignee = document.getElementById('editAssignee');
+                    
+                    // Clear existing options (keep first option)
+                    while (assigneeFilter.options.length > 1) {
+                        assigneeFilter.remove(1);
+                    }
+                    while (assigneeSelect.options.length > 1) {
+                        assigneeSelect.remove(1);
+                    }
+                    while (editAssignee.options.length > 1) {
+                        editAssignee.remove(1);
+                    }
+                    
+                    // Add user options
+                    users.forEach(user => {
+                        // Add to filter dropdown
+                        const filterOption = document.createElement('option');
+                        filterOption.value = user.id;
+                        filterOption.textContent = user.full_name || user.username;
+                        assigneeFilter.appendChild(filterOption);
+                        
+                        // Add to create task dropdown
+                        const selectOption = document.createElement('option');
+                        selectOption.value = user.id;
+                        selectOption.textContent = user.full_name || user.username;
+                        assigneeSelect.appendChild(selectOption);
+                        
+                        // Add to edit task dropdown
+                        const editOption = document.createElement('option');
+                        editOption.value = user.id;
+                        editOption.textContent = user.full_name || user.username;
+                        editAssignee.appendChild(editOption);
+                    });
+                });
         }
 
         function loadProjects() {
-            const projectFilter = document.getElementById('projectFilter');
-            const projectSelect = document.getElementById('projectSelect');
-            const editProject = document.getElementById('editProject');
-            
-            // Clear existing options (keep first option)
-            while (projectFilter.options.length > 1) {
-                projectFilter.remove(1);
-            }
-            while (projectSelect.options.length > 0) {
-                projectSelect.remove(0);
-            }
-            while (editProject.options.length > 0) {
-                editProject.remove(0);
-            }
-            
-            // Add to filter dropdown
-            projects.forEach(project => {
-                const filterOption = document.createElement('option');
-                filterOption.value = project.id;
-                filterOption.textContent = project.name;
-                projectFilter.appendChild(filterOption);
-                
-                // Add to create task dropdown
-                const selectOption = document.createElement('option');
-                selectOption.value = project.id;
-                selectOption.textContent = `${project.name} (${project.category})`;
-                projectSelect.appendChild(selectOption);
-                
-                // Add to edit task dropdown
-                const editOption = document.createElement('option');
-                editOption.value = project.id;
-                editOption.textContent = `${project.name} (${project.category})`;
-                editProject.appendChild(editOption);
-            });
+            fetch('/api/projects')
+                .then(response => response.json())
+                .then(projects => {
+                    const projectFilter = document.getElementById('projectFilter');
+                    const projectSelect = document.getElementById('projectSelect');
+                    const editProject = document.getElementById('editProject');
+                    
+                    // Clear existing options (keep first option)
+                    while (projectFilter.options.length > 1) {
+                        projectFilter.remove(1);
+                    }
+                    while (projectSelect.options.length > 0) {
+                        projectSelect.remove(0);
+                    }
+                    while (editProject.options.length > 0) {
+                        editProject.remove(0);
+                    }
+                    
+                    // Add to filter dropdown
+                    projects.forEach(project => {
+                        const filterOption = document.createElement('option');
+                        filterOption.value = project.id;
+                        filterOption.textContent = project.name;
+                        projectFilter.appendChild(filterOption);
+                        
+                        // Add to create task dropdown
+                        const selectOption = document.createElement('option');
+                        selectOption.value = project.id;
+                        selectOption.textContent = `${project.name} (${project.category.name})`;
+                        projectSelect.appendChild(selectOption);
+                        
+                        // Add to edit task dropdown
+                        const editOption = document.createElement('option');
+                        editOption.value = project.id;
+                        editOption.textContent = `${project.name} (${project.category.name})`;
+                        editProject.appendChild(editOption);
+                    });
+                });
         }
 
         function loadTasks() {
@@ -1296,35 +1306,40 @@
             const priority = document.getElementById('priorityFilter').value;
             const text = document.getElementById('textSearch').value.toLowerCase();
             
-            let filteredTasks = tasks;
+            let url = '/api/tasks?';
+            fetch(url)
+                .then(response => response.json())
+                .then(tasks => {
+                    let filteredTasks = tasks;
             
-            // Apply filters
-            if (status !== 'all') {
-                filteredTasks = filteredTasks.filter(task => task.status === status);
-            }
-            
-            if (assignee !== 'all') {
-                filteredTasks = filteredTasks.filter(task => task.assignee.id === parseInt(assignee));
-            }
-            
-            if (project !== 'all') {
-                filteredTasks = filteredTasks.filter(task => task.project.id === parseInt(project));
-            }
-            
-            if (priority !== 'all') {
-                filteredTasks = filteredTasks.filter(task => task.priority === priority);
-            }
-            
-            if (text) {
-                filteredTasks = filteredTasks.filter(task => 
-                    task.title.toLowerCase().includes(text) ||
-                    (task.description && task.description.toLowerCase().includes(text)) ||
-                    task.project.name.toLowerCase().includes(text) ||
-                    task.assignee.name.toLowerCase().includes(text)
-                );
-            }
-            
-            renderTasksTable(filteredTasks);
+                // Apply filters
+                if (status !== 'all') {
+                    filteredTasks = filteredTasks.filter(task => task.status === status);
+                }
+                
+                if (assignee !== 'all') {
+                    filteredTasks = filteredTasks.filter(task => task.assignee.id === parseInt(assignee));
+                }
+                
+                if (project !== 'all') {
+                    filteredTasks = filteredTasks.filter(task => task.project.id === parseInt(project));
+                }
+                
+                if (priority !== 'all') {
+                    filteredTasks = filteredTasks.filter(task => task.priority === priority);
+                }
+                
+                if (text) {
+                    filteredTasks = filteredTasks.filter(task => 
+                        task.title.toLowerCase().includes(text) ||
+                        (task.description && task.description.toLowerCase().includes(text)) ||
+                        task.project.name.toLowerCase().includes(text) ||
+                        task.assignee.name.toLowerCase().includes(text)
+                    );
+                }
+                
+                renderTasksTable(filteredTasks);
+            });
         }
 
         function renderTasksTable(tasks) {
