@@ -4,6 +4,7 @@ import logging
 import functools
 from flask import Flask, request, jsonify, session, redirect, url_for, render_template, flash, g
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import datetime
 from backend.database import DatabaseManager  # Import DatabaseManager class
 
@@ -11,6 +12,9 @@ from backend.database import DatabaseManager  # Import DatabaseManager class
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config['DATABASE_PATH'] = 'databases/taskmanager.db'
+# Directory to store uploaded comment attachments
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -68,6 +72,7 @@ def login():
             if user:
                 if user['password_hash'] == password_input:
                     # Update session with user data
+                    session['id']        = user['id']
                     session['userID']    = user['userID']
                     session['username']  = user['username']
                     session['full_name'] = user['full_name']
@@ -192,47 +197,7 @@ def get_tasks_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/tasks/<int:task_id>', methods=['GET'])
-@login_required
-def get_task_api(task_id):
-    """API endpoint to retrieve a single task by ID"""
-    try:
-        task = db_manager.get_task(task_id)
-        if not task:
-            return jsonify({'error': 'Task not found'}), 404
-        
-        task_dict = dict(task)
-        task_dict['assignee'] = {
-            'id': task_dict['assignee_id'],
-            'username': task_dict.pop('assignee_username'),
-            'full_name': task_dict.pop('assignee_full_name')
-        }
-        task_dict['project'] = {
-            'id': task_dict['project_id'],
-            'name': task_dict.pop('project_name'),
-            'category': {
-                'id': task_dict['category_id'],
-                'name': task_dict.pop('category_name'),
-                'type': task_dict.pop('category_type')
-            }
-        }
-        return jsonify(task_dict)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/tasks', methods=['POST'])
-@login_required
-def create_task_api():
-    """API endpoint to create a new task"""
-    try:
-        data = request.get_json()
-        if not data or 'title' not in data or 'project_id' not in data:
-            return jsonify({'error': 'Title and project ID are required'}), 400
-        
-        task_id = db_manager.create_task(data)
-        return jsonify({'id': task_id, 'message': 'Task created successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 @login_required
@@ -242,7 +207,7 @@ def update_task_api(task_id):
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-        
+
         success = db_manager.update_task(task_id, data)
         if success:
             return jsonify({'message': 'Task updated successfully'})
@@ -250,43 +215,117 @@ def update_task_api(task_id):
             return jsonify({'error': 'Task not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-#endregion
-
-#region API Routes - Comment Management
-@app.route('/api/tasks/<int:task_id>/comments', methods=['GET'])
-@login_required
-def get_comments_api(task_id):
-    """API endpoint to retrieve comments for a task"""
-    try:
-        comments = db_manager.get_comments(task_id)
-        result = []
-        for comment in comments:
-            comment_dict = dict(comment)
-            comment_dict['author'] = {
-                'id': comment_dict['author_id'],
-                'username': comment_dict.pop('author_username'),
-                'full_name': comment_dict.pop('author_full_name')
-            }
-            result.append(comment_dict)
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+ 
 @app.route('/api/tasks/<int:task_id>/comments', methods=['POST'])
 @login_required
 def add_comment_api(task_id):
-    """API endpoint to add a new comment to a task"""
+    """API endpoint to add a new comment to a task and optionally upload attachments.
+
+    Accepts either JSON ({"content": "..."}) or multipart/form-data with
+    'content' and one or more files under the 'files' field.
+    """
     try:
-        data = request.get_json()
-        if not data or 'content' not in data:
+        # Support multipart form uploads or raw JSON
+        content = None
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            content = request.form.get('content')
+        else:
+            data = request.get_json(silent=True) or {}
+            content = data.get('content')
+
+        if not content:
             return jsonify({'error': 'Content is required'}), 400
-        
-        # Get current user from session
-        author_id = session.get('user_id', 1)
-        
-        comment_id = db_manager.add_comment(task_id, author_id, data['content'])
-        return jsonify({'id': comment_id, 'message': 'Comment added successfully'})
+
+        # Resolve author id from session (support different session keys)
+        print(f"session: {session}")
+        author_id = session.get('id')
+
+        # Insert comment
+        comment_id = db_manager.add_comment(task_id, author_id, content)
+
+        uploaded_files = []
+
+        # Handle uploaded files
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            files = request.files.getlist('files')
+            for f in files:
+                if f and f.filename:
+                    filename = secure_filename(f.filename)
+                    task_folder = os.path.join(app.config['UPLOAD_FOLDER'], f'task_{task_id}')
+                    os.makedirs(task_folder, exist_ok=True)
+                    dest_path = os.path.join(task_folder, filename)
+                    f.save(dest_path)
+
+                    # Record attachment metadata in DB
+                    attachment_id = db_manager.add_attachment(comment_id, filename, dest_path, f.content_type)
+                    download_url = url_for('download_attachment', attachment_id=attachment_id)
+                    uploaded_files.append({'id': attachment_id, 'filename': filename, 'download_url': download_url})
+
+        return jsonify({'id': comment_id, 'attachments': uploaded_files, 'message': 'Comment added successfully'})
     except Exception as e:
+        app.logger.exception('Error adding comment')
+        return jsonify({'error': str(e)}), 500
+
+
+# Return comments for a task (JSON)
+@app.route('/api/tasks/<int:task_id>/comments', methods=['GET'])
+@login_required
+def get_comments_api(task_id):
+    try:
+        comments = db_manager.get_comments(task_id)
+        result = []
+        for c in comments:
+            row = dict(c)
+            # Normalize created_at to ISO if present
+            created_at = row.get('created_at')
+            # Map author to include external userID and names
+            author = {
+                'id': row.get('author_id'),
+                'username': row.get('author_username'),
+                'full_name': row.get('author_full_name')
+            }
+            # Attachments
+            attachments = []
+            atts = db_manager.get_attachments_by_comment(row['id'])
+            for a in atts:
+                arow = dict(a)
+                try:
+                    download_url = url_for('download_attachment', attachment_id=arow['id'])
+                except Exception:
+                    download_url = None
+                attachments.append({'id': arow.get('id'), 'filename': arow.get('filename'), 'download_url': download_url})
+
+            result.append({
+                'id': row.get('id'),
+                'content': row.get('content'),
+                'created_at': created_at,
+                'author': author,
+                'attachments': attachments
+            })
+        return jsonify(result)
+    except Exception as e:
+        app.logger.exception('Error fetching comments')
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/attachments/<int:attachment_id>', methods=['GET'])
+@login_required
+def download_attachment(attachment_id):
+    try:
+        att = db_manager.get_attachment(attachment_id)
+        if not att:
+            return jsonify({'error': 'Attachment not found'}), 404
+        # sqlite3.Row does not have .get(); convert to dict for safe access
+        att_row = dict(att)
+        filepath = att_row.get('filepath')
+        if not filepath or not os.path.exists(filepath):
+            return jsonify({'error': 'File not found on server'}), 404
+        # Use send_file to serve the file
+        from flask import send_file
+        # Use download_name where available; provide filename from DB
+        return send_file(filepath, as_attachment=True, download_name=att_row.get('filename'))
+    except Exception as e:
+        app.logger.exception('Error downloading attachment')
         return jsonify({'error': str(e)}), 500
 #endregion
 
@@ -371,7 +410,7 @@ def get_active_projects():
         return jsonify({'active': active})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
 @app.route('/api/dashboard/delayed-tasks', methods=['GET'])
 @login_required
 def get_delayed_tasks():
@@ -383,6 +422,5 @@ def get_delayed_tasks():
         return jsonify({'error': str(e)}), 500
 #endregion
 
-# Application Entry Point
 if __name__ == '__main__':
     app.run(debug=True)

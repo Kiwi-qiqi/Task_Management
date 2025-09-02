@@ -225,10 +225,11 @@ body {
 
 /* 关键部分 - 修复表头固定和高度变化问题 */
 .tasks-scroll-container {
-    max-height: 50vh;
-    overflow-y: auto;
+    max-height: 70vh;
+    overflow-y: auto; /* scrolling occurs on this container */
     transition: max-height 0.3s ease;
-    position: relative; /* 确保表头固定位置正确 */
+    position: relative; /* ensure sticky positioning context */
+    -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
 }
 
 .tasks-scroll-container.details-visible {
@@ -243,9 +244,12 @@ body {
 
 /* 修复表头固定问题 */
 .tasks-table thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+     /* Keep the thead sticky relative to the scrolling ancestor
+         (.tasks-scroll-container). Make sure the header has a solid
+         background and high z-index so rows don't bleed through. */
+     position: sticky;
+     top: 0;
+     z-index: 50;
 }
 
 .tasks-table th {
@@ -259,6 +263,18 @@ body {
     cursor: pointer;
     user-select: none;
     border-bottom: 1px solid var(--border-color);
+}
+
+/* Avoid nested scrolling: let .tasks-scroll-container handle vertical
+   scrolling while allowing .table-responsive to remain visible so
+   position: sticky works correctly. */
+.tasks-scroll-container .table-responsive {
+    overflow: visible;
+}
+
+/* Ensure the header cells paint above table rows */
+.tasks-table thead th {
+    background-clip: padding-box;
 }
 
 .tasks-table th.sorted {
@@ -722,4 +738,80 @@ body {
     .tasks-count {
         align-self: flex-end;
     }
+}
+
+/* Styles that were previously inline in the HTML template */
+.loading,
+.error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+}
+
+.loading i,
+.error i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sidebar-title {
+    color: white;
+    font-weight: 600;
+}
+
+/* logout modal small adjustments (kept minimal, larger set exists in file) */
+.logout-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.logout-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.logout-modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.logout-modal-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirm-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
 }

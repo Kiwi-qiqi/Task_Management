@@ -96,6 +96,13 @@
             font-size: 28px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
+
+        .tagline {
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+            margin-top: 6px;
+            opacity: 0.95;
+        }
         
         .login-body {
             padding: 40px 30px 30px;
@@ -145,6 +152,25 @@
         
         .floating-label .form-control {
             padding-top: 20px;
+        }
+
+        /* icon inside input */
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a92a6;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .form-control.with-icon {
+            padding-left: 44px;
+        }
+
+        .floating-label .form-control.with-icon ~ label {
+            left: 44px;
         }
         
         .floating-label label {
@@ -208,6 +234,13 @@
             padding: 12px 15px;
             margin-bottom: 20px;
         }
+
+        @media (max-width: 420px) {
+            .login-header { padding: 22px 20px 14px; }
+            .login-body { padding: 24px 20px 20px; }
+            .logo-icon { width: 52px; height: 52px; font-size: 24px; }
+            .login-card { border-radius: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -231,15 +264,16 @@
                 
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="floating-label">
-                        <input type="text" class="form-control" id="userID" name="userID" placeholder=" " required>
-                        <label for="userID">userID</label>
+                        <div class="input-icon"><i class="bi bi-person"></i></div>
+                        <input type="text" class="form-control with-icon" id="userID" name="userID" placeholder=" " required>
+                        <label for="userID">User ID</label>
                     </div>
-                    
+
                     <div class="floating-label">
-                        <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                        <div class="input-icon"><i class="bi bi-lock"></i></div>
+                        <input type="password" class="form-control with-icon" id="password" name="password" placeholder=" " required>
                         <label for="password">Password</label>
                     </div>
-                    
                     <button type="submit" class="btn btn-login w-100">Login</button>
                 </form>
             </div>

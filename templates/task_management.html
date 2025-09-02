@@ -9,77 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/task_management.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        .loading,
-        .error {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 80vh;
-            text-align: center;
-        }
-        
-        .loading i,
-        .error i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .fa-spinner {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .logout-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .logout-modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            max-width: 400px;
-            width: 100%;
-        }
-        
-        .logout-modal-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .logout-modal-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .confirm-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-        
-        .cancel-btn {
-            background-color: #6c757d;
-            color: white;
-        }
-    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -87,7 +16,7 @@
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <div class="d-flex justify-content-center mb-5">
-                    <h4 style="color: white; font-weight: 600;">Task Management</h4>
+                    <h4 class="sidebar-title">Task Management</h4>
                 </div>
 
                 <div class="user-card">
@@ -132,7 +61,7 @@
                 <i class="fas fa-exclamation-circle"></i>
                 <span>Confirm Logout</span>
             </div>
-            <p>Are you sure you want to logout from Task Management System?</p>
+            <p>Are you sure you want to log out from the Task Management System?</p>
             <div class="logout-modal-buttons">
                 <button class="logout-modal-button confirm-btn" id="confirmLogout">Confirm</button>
                 <button class="logout-modal-button cancel-btn" id="cancelLogout">Cancel</button>
@@ -147,50 +76,48 @@
 
         // Initialize after page load
         document.addEventListener('DOMContentLoaded', function() {
-            // 检查用户角色并控制Dashboard链接显示
+            // Check user role and control Dashboard link visibility
             const isAdmin = "{{ session.title }}" === "System Administrator";
             console.info("Is Admin (title): ", isAdmin);
             
             const dashboardLink = document.getElementById('dashboardLink');
             const taskLink = document.getElementById('taskLink');
             
-            // 根据角色显示/隐藏Dashboard链接
+            // Show/hide the Dashboard link based on role
             if (dashboardLink) {
                 dashboardLink.style.display = isAdmin ? 'block' : 'none';
             }
             
-            // 导航链接点击事件（添加权限检查）
+            // Navigation link click events (permission check)
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     
                     const targetPage = this.getAttribute('data-page');
                     
-                    // 检查权限 - 修复：使用 title 而不是 role
+                    // Permission check - use title rather than role
                     if (targetPage === 'dashboard' && "{{ session.title }}" !== "System Administrator") {
-                        alert('您没有权限访问仪表板');
+                        alert('You do not have permission to access the dashboard');
                         return;
                     }
                     
-                    // 更新active状态
-                    document.querySelectorAll('.nav-links a').forEach(a => {
-                        a.classList.remove('active');
-                    });
+                    // Update active state
+                    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // 加载页面
+                    // Load page
                     loadPage(targetPage);
                     
-                    // 更新URL
+                    // Update URL
                     history.pushState({page: targetPage}, '', `?page=${targetPage}`);
                 });
             });
             
-            // 获取URL参数
+            // Get URL parameter
             const urlParams = new URLSearchParams(window.location.search);
             const pageParam = urlParams.get('page');
             
-            // 确定默认加载的页面
+            // Determine default page to load
             let loadPageName = 'task';
             let activeClassName = 'taskLink';
             
@@ -198,11 +125,13 @@
                 loadPageName = 'dashboard';
                 activeClassName = 'dashboardLink';
             }
+
+            const activeElement = document.getElementById(activeClassName);
+            if (activeElement) {
+                activeElement.classList.add('active');
+            }
             
-            // 设置活动链接
-            document.getElementById(activeClassName).classList.add('active');
-            
-            // 加载页面
+            // Load initial page
             loadPage(loadPageName);
             
             // Handle back/forward navigation
@@ -226,40 +155,46 @@
             const confirmLogout = document.getElementById('confirmLogout');
             const cancelLogout = document.getElementById('cancelLogout');
             
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                logoutModal.style.display = 'flex';
-            });
-            
-            confirmLogout.addEventListener('click', function() {
-                // Perform logout API call
-                fetch('/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = '/login';
-                    } else {
-                        alert('Logout failed. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Logout error:', error);
-                    alert('Logout failed. Please try again.');
+            if (logoutBtn && logoutModal) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logoutModal.style.display = 'flex';
                 });
-            });
+            }
             
-            cancelLogout.addEventListener('click', function() {
-                logoutModal.style.display = 'none';
-            });
+            if (confirmLogout) {
+                confirmLogout.addEventListener('click', function() {
+                    // Perform logout API call
+                    fetch('/logout', {
+                        method: 'POST',
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/login';
+                        } else {
+                            alert('Logout failed. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        alert('Logout failed. Please try again.');
+                    });
+                });
+            }
             
-            // Close modal when clicking outside
-            logoutModal.addEventListener('click', function(e) {
-                if (e.target === logoutModal) {
+            if (cancelLogout && logoutModal) {
+                cancelLogout.addEventListener('click', function() {
                     logoutModal.style.display = 'none';
-                }
-            });
+                });
+
+                // Close modal when clicking outside
+                logoutModal.addEventListener('click', function(e) {
+                    if (e.target === logoutModal) {
+                        logoutModal.style.display = 'none';
+                    }
+                });
+            }
         });
 
         // Load page content
@@ -267,14 +202,14 @@
             const contentContainer = document.getElementById('mainContent');
             contentContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
             
-            // 添加Dashboard权限检查 - 修复：使用 title 而不是 role
+            // Dashboard permission check - use title rather than role
             if (pageName === 'dashboard' && "{{ session.title }}" !== "System Administrator") {
                 contentContainer.innerHTML = `
                     <div class="error text-center py-5">
                         <i class="fas fa-ban fa-3x text-danger mb-3"></i>
-                        <h3>访问受限</h3>
-                        <p>您没有权限访问仪表板页面</p>
-                        <button class="btn btn-primary mt-3" onclick="loadPage('task')">返回任务管理</button>
+                        <h3>Access Restricted</h3>
+                        <p>You do not have permission to access the dashboard page</p>
+                        <button class="btn btn-primary mt-3" onclick="loadPage('task')">Return to Task Management</button>
                     </div>
                 `;
                 return;
@@ -310,10 +245,10 @@
                     console.log("Fetched HTML for", pageName);
                     contentContainer.innerHTML = html;
                     
-                    // 检查脚本是否已加载
+                    // Check if script already loaded
                     if (loadedScripts[scriptPath]) {
                         console.log("Script already loaded:", scriptPath);
-                        // 如果已加载，直接初始化页面
+                        // If already loaded, call init if present
                         if (typeof window[initFunction] === 'function') {
                             console.log("Calling init function:", initFunction);
                             window[initFunction]();
@@ -321,17 +256,17 @@
                         return;
                     }
                     
-                    // 加载对应的JS文件
+                    // Load corresponding JS file
                     const script = document.createElement('script');
                     script.src = scriptPath;
                     script.setAttribute('data-page', pageName);
                     
                     script.onload = function() {
                         console.log("Script loaded successfully:", scriptPath);
-                        // 标记脚本已加载
+                        // mark script as loaded
                         loadedScripts[scriptPath] = true;
                         
-                        // 初始化页面
+                        // initialize page
                         if (typeof window[initFunction] === 'function') {
                             console.log("Calling init function:", initFunction);
                             window[initFunction]();
@@ -345,9 +280,9 @@
                         contentContainer.innerHTML = `
                             <div class="error">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <p>脚本加载失败</p>
-                                <p>路径: ${scriptPath}</p>
-                                <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">重试</button>
+                                <p>Script failed to load</p>
+                                <p>Path: ${scriptPath}</p>
+                                <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">Retry</button>
                             </div>
                         `;
                     };
@@ -360,9 +295,9 @@
                     contentContainer.innerHTML = `
                         <div class="error">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <p>页面加载失败，请重试</p>
-                            <p>错误: ${error.message}</p>
-                            <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">重试</button>
+                            <p>Page failed to load, please try again</p>
+                            <p>Error: ${error.message}</p>
+                            <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">Retry</button>
                         </div>
                     `;
                 });

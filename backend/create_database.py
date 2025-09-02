@@ -80,11 +80,24 @@ def create_tables(cursor):
     CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT NOT NULL,
-        created_at DATIME DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         task_id INTEGER NOT NULL,
         author_id INTEGER NOT NULL,
         FOREIGN KEY (task_id) REFERENCES tasks (id),
         FOREIGN KEY (author_id) REFERENCES users (id)
+    )
+    ''')
+
+    # 创建附件表（用于存储评论附件的元数据，文件实际保存在文件系统中）
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS attachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filename VARCHAR(255) NOT NULL,
+        filepath TEXT NOT NULL,
+        content_type VARCHAR(100),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        comment_id INTEGER NOT NULL,
+        FOREIGN KEY (comment_id) REFERENCES comments (id)
     )
     ''')
     
@@ -222,6 +235,30 @@ def insert_comments(cursor, comments_data):
         )
     
     print(f"插入了 {len(comments_data)} 条评论记录")
+    return True
+
+def insert_attachments(cursor, attachments_data):
+    """Insert attachments metadata into attachments table.
+
+    attachments_data is expected to be a sequence of dicts with keys:
+    filename, filepath, content_type, comment_id, created_at (optional)
+    """
+    if not attachments_data:
+        return False
+
+    for a in attachments_data:
+        cursor.execute(
+            'INSERT INTO attachments (filename, filepath, content_type, created_at, comment_id) VALUES (?, ?, ?, ?, ?)',
+            (
+                a.get('filename'),
+                a.get('filepath'),
+                a.get('content_type'),
+                a.get('created_at'),
+                a.get('comment_id')
+            )
+        )
+
+    print(f"插入了 {len(attachments_data)} 条附件记录")
     return True
 
 def create_database():
