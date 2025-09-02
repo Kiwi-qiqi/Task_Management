@@ -1,0 +1,415 @@
+<div class="main-content-inner">
+    <div class="content-container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-group">
+                    <label class="search-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="all">All Statuses</option>
+                        <option value="todo">To Do</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="review">In Review</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label class="search-label">Assignee</label>
+                    <select class="form-select" id="assigneeFilter">
+                        <option value="all">All Assignees</option>
+                        <!-- Dynamically populated -->
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label class="search-label">Project</label>
+                    <select class="form-select" id="projectFilter">
+                        <option value="all">All Projects</option>
+                        <!-- Dynamically populated -->
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label class="search-label">Priority</label>
+                    <select class="form-select" id="priorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label class="search-label">Search Text</label>
+                    <input type="text" class="form-control" id="textSearch" placeholder="Search tasks...">
+                </div>
+                
+                <div class="search-group d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tasks Table -->
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h3 class="tasks-title">All Tasks</h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                    <i class="bi bi-plus-circle"></i> Create Task
+                </button>
+                <div class="tasks-count">Showing <span id="tasksCount">0</span> tasks</div>
+            </div>
+            
+            <!-- 修改这里：添加可滚动容器 -->
+            <div class="tasks-scroll-container" id="tasksScrollContainer">
+                <div class="table-responsive">
+                    <table class="tasks-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="title">Title <i class="bi bi-arrow-down"></i></th>
+                                <th data-sort="project">Project</th>
+                                <th data-sort="assignee">Assignee</th>
+                                <th data-sort="priority">Priority</th>
+                                <th data-sort="status">Status</th>
+                                <th data-sort="due_date">Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTableBody">
+                            <!-- Tasks will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Task Detail Section -->
+        <div class="task-detail-container" id="taskDetailContainer">
+            <div class="task-detail-header">
+                <div>
+                    <h2 class="task-detail-title">
+                        <i class="bi bi-card-checklist"></i>
+                        <span id="taskDetailTitle">Task Title</span>
+                    </h2>
+                    <div class="d-flex gap-2 mt-2">
+                        <span class="status-badge" id="taskDetailStatus">Status</span>
+                        <span class="priority-badge" id="taskDetailPriority">Priority</span>
+                    </div>
+                </div>
+                <div class="task-detail-actions">
+                    <button class="btn btn-outline-primary" id="editTaskBtn">
+                        <i class="bi bi-pencil"></i> Edit Task
+                    </button>
+                    <button class="btn btn-outline-secondary" id="closeDetailBtn">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
+                </div>
+            </div>
+            
+            <div class="task-detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">Task Information</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value" id="taskDetailDescription">No description provided</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Type:</div>
+                        <div class="detail-value" id="taskDetailType">Task</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Severity:</div>
+                        <div class="detail-value" id="taskDetailSeverity">Normal</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created:</div>
+                        <div class="detail-value" id="taskDetailCreated">Date</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Updated:</div>
+                        <div class="detail-value" id="taskDetailUpdated">Date</div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">Assignment</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Project:</div>
+                        <div class="detail-value" id="taskDetailProject">Project Name</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Category:</div>
+                        <div class="detail-value" id="taskDetailCategory">Category</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Assignee:</div>
+                        <div class="detail-value" id="taskDetailAssignee">Assignee Name</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Start Date:</div>
+                        <div class="detail-value" id="taskDetailStartDate">Date</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Due Date:</div>
+                        <div class="detail-value" id="taskDetailDueDate">Date</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comments-section">
+                <h4 class="comments-title">Comments</h4>
+                
+                <div class="comments-container" id="commentsContainer">
+                    <!-- Comments will be loaded here -->
+                </div>
+                
+                <form class="add-comment-form" id="addCommentForm">
+                    <textarea class="form-control" placeholder="Add a comment..." id="commentInput" required></textarea>
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Task Modal -->
+<div class="modal fade" id="createTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Task Title</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Task Type</label>
+                                <select class="form-select" name="type">
+                                    <option value="task">Task</option>
+                                    <option value="bug">Bug</option>
+                                    <option value="feature">Feature</option>
+                                    <option value="improvement">Improvement</option>
+                                    <option value="test">Test</option>
+                                    <option value="design">Design</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" name="priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Severity</label>
+                                <select class="form-select" name="severity">
+                                    <option value="trivial">Trivial</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="major">Major</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="todo" selected>To Do</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="review">In Review</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" name="start_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="datetime-local" class="form-control" name="due_date">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Assignee</label>
+                                <select class="form-select" name="assignee_id" id="assigneeSelect">
+                                    <option value="">Unassigned</option>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Project</label>
+                                <select class="form-select" name="project_id" id="projectSelect" required>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitTaskForm">Create Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <input type="hidden" id="editTaskId" name="id">
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Task Title</label>
+                                <input type="text" class="form-control" name="title" id="editTitle" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Task Type</label>
+                                <select class="form-select" name="type" id="editType">
+                                    <option value="task">Task</option>
+                                    <option value="bug">Bug</option>
+                                    <option value="feature">Feature</option>
+                                    <option value="improvement">Improvement</option>
+                                    <option value="test">Test</option>
+                                    <option value="design">Design</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" name="priority" id="editPriority">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Severity</label>
+                                <select class="form-select" name="severity" id="editSeverity">
+                                    <option value="trivial">Trivial</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="major">Major</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status" id="editStatus">
+                                    <option value="todo" selected>To Do</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="review">In Review</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" name="start_date" id="editStartDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="datetime-local" class="form-control" name="due_date" id="editDueDate">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Assignee</label>
+                                <select class="form-select" name="assignee_id" id="editAssignee">
+                                    <option value="">Unassigned</option>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Project</label>
+                                <select class="form-select" name="project_id" id="editProject" required>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" id="editDescription" rows="3"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveTaskChanges">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

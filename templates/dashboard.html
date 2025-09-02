@@ -1,0 +1,67 @@
+<div class="main-content-inner">
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-title">Total Projects</div>
+                <div class="card-value" id="totalProjects">{{ total_projects }}</div>
+                <div class="card-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-title">Total Tasks</div>
+                <div class="card-value" id="totalTasks">{{ total_tasks }}</div>
+                <div class="card-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-list-task"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-title">Active Projects</div>
+                <div class="card-value" id="activeProjects">{{ active_projects }}</div>
+                <div class="card-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-clock"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-title">Delayed Tasks</div>
+                <div class="card-value" id="delayedTasks">{{ delayed_tasks }}</div>
+                <div class="card-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+     <!-- Charts Container -->
+    <div class="charts-container">
+        <!-- Project Task Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">Tasks per Project</h2>
+            </div>
+            <div class="chart-container" id="projectTaskChartContainer">
+                <canvas id="projectTaskChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- User Task Distribution -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">Tasks per User</h2>
+            </div>
+            <div class="chart-container" id="userTaskChartContainer">
+                <canvas id="userTaskChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

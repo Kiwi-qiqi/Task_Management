@@ -1,534 +1,388 @@
-# app.py
-from flask.cli import with_appcontext
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from models import db, User, Category, Project, Task, Comment
-from sqlalchemy.orm import joinedload
-from datetime import datetime
 import os
-import json
-import click
+import sqlite3
+import logging
+import functools
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template, flash, g
+from werkzeug.security import check_password_hash
+from datetime import datetime
+from backend.database import DatabaseManager  # Import DatabaseManager class
 
+# Initialize Flask application
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskmanager.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.urandom(24)
+app.config['DATABASE_PATH'] = 'databases/taskmanager.db'
 
-db.init_app(app)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+app.logger.setLevel(logging.INFO)
 
-# Flask-Login configuration
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
+# Ensure database directory exists
+os.makedirs(os.path.dirname(app.config['DATABASE_PATH']), exist_ok=True)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# Initialize DatabaseManager instance
+db_manager = DatabaseManager(app.config['DATABASE_PATH'])
 
-# Route definitions
+#region Database Connection Management
+def get_db():
+    """Get a database connection (reuses connection within same request context)"""
+    if 'db' not in g:
+        g.db = sqlite3.connect(app.config['DATABASE_PATH'])
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error=None):
+    """Close database connection at end of request"""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+#endregion
+
+#region Authentication Decorators
+def login_required(view):
+    """View decorator that redirects anonymous users to login page"""
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if 'userID' not in session:
+            if request.path.startswith('/api'):
+                return jsonify({'error': 'Authentication required'}), 401
+            return redirect(url_for('login'))
+        return view(**kwargs)
+    return wrapped_view
+#endregion
+
+#region Authentication Routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handle user login authentication"""
+    if request.method == 'POST':
+        userID = request.form['userID'].strip()
+        password_input = request.form['password'].strip()
+        
+        db = get_db()
+        try:
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM users WHERE userID = ?', (userID,))
+            user = cursor.fetchone()
+            
+            if user:
+                if user['password_hash'] == password_input:
+                    # Update session with user data
+                    session['userID']    = user['userID']
+                    session['username']  = user['username']
+                    session['full_name'] = user['full_name']
+                    session['title']     = user['title']
+                    return redirect(url_for('task_management'))
+                else:
+                    return render_template('login.html', error='Invalid credentials')
+            else:
+                return render_template('login.html', error='User not found')
+                
+        except Exception as e:
+            print(f"Database error: {str(e)}")
+            flash('System error, please try again later')
+
+    return render_template('login.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    """Clear current user session"""
+    session.clear()
+    return redirect(url_for('login'))
+#endregion
+
+#region Main Page Routes
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    """Redirect to task management dashboard"""
+    return redirect(url_for('task_management'))
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
-        
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for('index'))
-        else:
-            flash('Invalid username or password')
-    
-    return render_template('login.html')
-
-@app.route('/logout')
+@app.route('/task_management')
 @login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+def task_management():
+    """Render main task management interface"""
+    userID = session['userID']    
+    username = session['username']  
+    full_name = session['full_name'] 
+    return render_template('task_management.html',
+                           userID=userID,
+                           username=username,
+                           full_name=full_name)
 
-@app.route('/api/tasks')
+@app.route('/api/task_manage', methods=['GET', 'POST'])
 @login_required
-def get_tasks():
-    # Get all query parameters
-    status = request.args.get('status', 'all')
-    assignee = request.args.get('assignee', 'all')
-    project = request.args.get('project', 'all')
-    priority = request.args.get('priority', 'all')
-    text = request.args.get('text', '').lower()
-    
-    # Build base query with eager loading
-    query = Task.query.options(
-        joinedload(Task.assignee),
-        joinedload(Task.project).joinedload(Project.category),
-        joinedload(Task.comments).joinedload(Comment.author)
-    ).order_by(Task.due_date.asc())
-    
-    # Apply filters
-    if status != 'all':
-        query = query.filter(Task.status == status)
-    if assignee != 'all':
-        query = query.filter(Task.assignee_id == assignee)
-    if project != 'all':
-        query = query.filter(Task.project_id == project)
-    if priority != 'all':
-        query = query.filter(Task.priority == priority)
-    
-    # Execute query
-    tasks = query.all()
-    
-    # Apply text search filter (case-insensitive)
-    if text:
-        filtered_tasks = []
-        for task in tasks:
-            # Extract text fields to search
-            search_fields = [
-                task.title,
-                task.description or "",
-                task.project.name,
-                task.assignee.full_name if task.assignee else "",
-                task.assignee.username if task.assignee else ""
-            ]
-            
-            # Check if any field contains the search text
-            if any(text in field.lower() for field in search_fields):
-                filtered_tasks.append(task)
-        tasks = filtered_tasks
-    
-    # Convert to JSON format
-    tasks_data = []
-    for task in tasks:
-        comments = []
-        for comment in task.comments:
-            comments.append({
-                'id': comment.id,
-                'content': comment.content,
-                'author': {
-                    'id': comment.author.id,
-                    'username': comment.author.username,
-                    'full_name': comment.author.full_name
-                },
-                'date': comment.created_at.strftime('%Y-%m-%d')  # Only date part
-            })
-        
-        task_data = {
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'type': task.type.value if task.type else None,
-            'status': task.status,
-            'priority': task.priority,
-            'severity': task.severity.value if task.severity else None,
-            'start_date': task.start_date.isoformat() if task.start_date else None,
-            'due_date': task.due_date.isoformat() if task.due_date else None,
-            'created_at': task.created_at.isoformat(),
-            'updated_at': task.updated_at.isoformat(),
-            'assignee': {
-                'id': task.assignee.id if task.assignee else None,
-                'username': task.assignee.username if task.assignee else 'Unassigned',
-                'full_name': task.assignee.full_name if task.assignee else None
-            },
-            'project': {
-                'id': task.project.id,
-                'name': task.project.name,
-                'category': {
-                    'id': task.project.category.id,
-                    'name': task.project.category.name,
-                    'type': task.project.category.type
-                }
-            },
-            'comments': comments
+def redirect_to_task_manage():
+    """Redirect to task management interface"""
+    return redirect(url_for('task_manage'))
+
+@app.route('/task_manage')
+@login_required
+def task_manage():
+    """Render task management page"""
+    return render_template('task_manage.html')
+#endregion
+
+#region API Routes - User Management
+@app.route('/api/users', methods=['GET'])
+@login_required
+def get_users_api():
+    """API endpoint to retrieve all users"""
+    try:
+        users = db_manager.get_users()
+        return jsonify([dict(user) for user in users])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#endregion
+
+#region API Routes - Project Management
+@app.route('/api/projects', methods=['GET'])
+@login_required
+def get_projects_api():
+    """API endpoint to retrieve all projects"""
+    try:
+        projects = db_manager.get_projects()
+        result = []
+        for project in projects:
+            project_dict = dict(project)
+            project_dict['category'] = {
+                'name': project_dict.pop('category_name'),
+                'type': project_dict.pop('category_type')
+            }
+            result.append(project_dict)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#endregion
+
+#region API Routes - Task Management
+@app.route('/api/tasks', methods=['GET'])
+@login_required
+def get_tasks_api():
+    """API endpoint to retrieve tasks with optional filters"""
+    try:
+        filters = {
+            'status': request.args.get('status'),
+            'assignee': request.args.get('assignee'),
+            'project': request.args.get('project'),
+            'priority': request.args.get('priority'),
+            'search_text': request.args.get('search_text')
         }
-        tasks_data.append(task_data)
-    
-    return jsonify(tasks_data)
+        
+        tasks = db_manager.get_tasks(filters)
+        result = []
+        for task in tasks:
+            task_dict = dict(task)
+            task_dict['assignee'] = {
+                'id': task_dict['assignee_id'],
+                'username': task_dict.pop('assignee_username'),
+                'full_name': task_dict.pop('assignee_full_name')
+            }
+            task_dict['project'] = {
+                'id': task_dict['project_id'],
+                'name': task_dict.pop('project_name'),
+                'category': {
+                    'name': task_dict.pop('category_name'),
+                    'type': task_dict.pop('category_type')
+                }
+            }
+            result.append(task_dict)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/tasks/<int:task_id>')
+@app.route('/api/tasks/<int:task_id>', methods=['GET'])
 @login_required
-def get_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    
-    task_data = {
-        'id': task.id,
-        'title': task.title,
-        'description': task.description,
-        'type': task.type,
-        'status': task.status,
-        'priority': task.priority,
-        'severity': task.severity,
-        'start_date': task.start_date.isoformat() if task.start_date else None,
-        'due_date': task.due_date.isoformat() if task.due_date else None,
-        'created_at': task.created_at.isoformat(),
-        'updated_at': task.updated_at.isoformat(),
-        'assignee': {
-            'id': task.assignee.id if task.assignee else None,
-            'username': task.assignee.username if task.assignee else 'Unassigned',
-            'full_name': task.assignee.full_name if task.assignee else None,
-            'title': task.assignee.title if task.assignee else None
-        },
-        'project': {
-            'id': task.project.id,
-            'name': task.project.name,
-            'main_rd': task.project.main_rd,
-            'supplier': task.project.supplier,
+def get_task_api(task_id):
+    """API endpoint to retrieve a single task by ID"""
+    try:
+        task = db_manager.get_task(task_id)
+        if not task:
+            return jsonify({'error': 'Task not found'}), 404
+        
+        task_dict = dict(task)
+        task_dict['assignee'] = {
+            'id': task_dict['assignee_id'],
+            'username': task_dict.pop('assignee_username'),
+            'full_name': task_dict.pop('assignee_full_name')
+        }
+        task_dict['project'] = {
+            'id': task_dict['project_id'],
+            'name': task_dict.pop('project_name'),
             'category': {
-                'id': task.project.category.id,
-                'name': task.project.category.name,
-                'type': task.project.category.type
+                'id': task_dict['category_id'],
+                'name': task_dict.pop('category_name'),
+                'type': task_dict.pop('category_type')
             }
         }
-    }
-    
-    return jsonify(task_data)
+        return jsonify(task_dict)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/tasks', methods=['POST'])
 @login_required
-def create_task():
-    data = request.json
-    
-    # Validate required fields
-    required_fields = ['title', 'project_id']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'Missing required field: {field}'}), 400
-    
-    # Create new task
-    new_task = Task(
-        title=data['title'],
-        description=data.get('description', ''),
-        type=data.get('type', 'task'),
-        status=data.get('status', 'todo'),
-        priority=data.get('priority', 'medium'),
-        severity=data.get('severity', 'normal'),
-        project_id=data['project_id'],
-        assignee_id=data.get('assignee_id'),
-        start_date=datetime.fromisoformat(data['start_date']) if 'start_date' in data else None,
-        due_date=datetime.fromisoformat(data['due_date']) if 'due_date' in data else None
-    )
-    
-    db.session.add(new_task)
-    db.session.commit()
-    
-    return jsonify({'message': 'Task created successfully', 'id': new_task.id}), 201
+def create_task_api():
+    """API endpoint to create a new task"""
+    try:
+        data = request.get_json()
+        if not data or 'title' not in data or 'project_id' not in data:
+            return jsonify({'error': 'Title and project ID are required'}), 400
+        
+        task_id = db_manager.create_task(data)
+        return jsonify({'id': task_id, 'message': 'Task created successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 @login_required
-def update_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    data = request.json
-    
-    # Update task fields
-    if 'title' in data:
-        task.title = data['title']
-    if 'description' in data:
-        task.description = data['description']
-    if 'type' in data:
-        task.type = data['type']
-    if 'status' in data:
-        task.status = data['status']
-    if 'priority' in data:
-        task.priority = data['priority']
-    if 'severity' in data:
-        task.severity = data['severity']
-    if 'assignee_id' in data:
-        task.assignee_id = data['assignee_id']
-    if 'project_id' in data:
-        task.project_id = data['project_id']
-    if 'start_date' in data:
-        task.start_date = datetime.fromisoformat(data['start_date']) if data['start_date'] else None
-    if 'due_date' in data:
-        task.due_date = datetime.fromisoformat(data['due_date']) if data['due_date'] else None
-    
-    task.updated_at = datetime.utcnow()
-    db.session.commit()
-    
-    return jsonify({'message': 'Task updated successfully'})
+def update_task_api(task_id):
+    """API endpoint to update an existing task"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        success = db_manager.update_task(task_id, data)
+        if success:
+            return jsonify({'message': 'Task updated successfully'})
+        else:
+            return jsonify({'error': 'Task not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#endregion
 
-@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+#region API Routes - Comment Management
+@app.route('/api/tasks/<int:task_id>/comments', methods=['GET'])
 @login_required
-def delete_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    db.session.delete(task)
-    db.session.commit()
-    
-    return jsonify({'message': 'Task deleted successfully'})
-
-@app.route('/api/tasks/<int:task_id>/comments')
-@login_required
-def get_comments(task_id):
-    task = Task.query.get_or_404(task_id)
-    comments = [
-        {
-            'id': comment.id,
-            'content': comment.content,
-            'created_at': comment.created_at.isoformat(),
-            'author': {
-                'id': comment.author.id,
-                'username': comment.author.username
+def get_comments_api(task_id):
+    """API endpoint to retrieve comments for a task"""
+    try:
+        comments = db_manager.get_comments(task_id)
+        result = []
+        for comment in comments:
+            comment_dict = dict(comment)
+            comment_dict['author'] = {
+                'id': comment_dict['author_id'],
+                'username': comment_dict.pop('author_username'),
+                'full_name': comment_dict.pop('author_full_name')
             }
-        }
-        for comment in task.comments
-    ]
-    
-    return jsonify(comments)
+            result.append(comment_dict)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/tasks/<int:task_id>/comments', methods=['POST'])
 @login_required
-def add_comment(task_id):
-    task = Task.query.get_or_404(task_id)
-    data = request.json
-    
-    if 'content' not in data or not data['content'].strip():
-        return jsonify({'error': 'Comment content is required'}), 400
-    
-    new_comment = Comment(
-        content=data['content'],
-        task_id=task_id,
-        author_id=current_user.id
-    )
-    
-    db.session.add(new_comment)
-    db.session.commit()
-    
-    return jsonify({'message': 'Comment added successfully'}), 201
+def add_comment_api(task_id):
+    """API endpoint to add a new comment to a task"""
+    try:
+        data = request.get_json()
+        if not data or 'content' not in data:
+            return jsonify({'error': 'Content is required'}), 400
+        
+        # Get current user from session
+        author_id = session.get('user_id', 1)
+        
+        comment_id = db_manager.add_comment(task_id, author_id, data['content'])
+        return jsonify({'id': comment_id, 'message': 'Comment added successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#endregion
 
-@app.route('/api/projects')
+#region Dashboard Routes
+@app.route('/api/dashboard')
 @login_required
-def get_projects():
-    projects = Project.query.all()
-    projects_data = [
-        {
-            'id': project.id,
-            'name': project.name,
-            'main_rd': project.main_rd,
-            'supplier': project.supplier,
-            'category': {
-                'id': project.category.id,
-                'name': project.category.name,
-                'type': project.category.type
-            }
-        }
-        for project in projects
-    ]
-    
-    return jsonify(projects_data)
+def get_dashboard_content():
+    """Render dashboard view for administrators"""
+    app.logger.info(f"Dashboard requested by {session.get('username')} with title: {session.get('title')}")
+    try:
+        # Check admin privileges
+        if session.get('title') != 'System Administrator':
+            app.logger.warning(f"Unauthorized access attempt by {session.get('username')}")
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Get dashboard statistics
+        app.logger.info("Fetching dashboard statistics...")
+        total_projects = db_manager.get_total_projects()
+        total_tasks = db_manager.get_total_tasks()
+        active_projects = db_manager.get_active_projects()
+        delayed_tasks = db_manager.get_delayed_tasks()
+        
+        app.logger.info(f"Statistics: projects={total_projects}, tasks={total_tasks}, active={active_projects}, delayed={delayed_tasks}")
+        
+        # Render dashboard template
+        return render_template('dashboard.html', 
+                              total_projects=total_projects,
+                              total_tasks=total_tasks,
+                              active_projects=active_projects,
+                              delayed_tasks=delayed_tasks)
+    except Exception as e:
+        app.logger.error(f"Error in get_dashboard_content: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/categories')
+# Dashboard API endpoints
+@app.route('/api/dashboard/project-task-counts', methods=['GET'])
 @login_required
-def get_categories():
-    categories = Category.query.all()
-    categories_data = [
-        {
-            'id': category.id,
-            'name': category.name,
-            'type': category.type,
-            'description': category.description
-        }
-        for category in categories
-    ]
-    
-    return jsonify(categories_data)
+def get_project_task_counts():
+    """API endpoint for project-task count statistics"""
+    try:
+        project_task_counts = db_manager.get_project_task_counts()
+        return jsonify([dict(row) for row in project_task_counts])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/users')
+@app.route('/api/dashboard/user-task-distribution', methods=['GET'])
 @login_required
-def get_users():
-    users = User.query.filter_by(role='employee').all()
-    users_data = [
-        {
-            'id': user.id,
-            'username': user.username,
-            'full_name': user.full_name,
-            'title': user.title
-        }
-        for user in users
-    ]
-    
-    return jsonify(users_data)
+def get_user_task_distribution():
+    """API endpoint for user task distribution data"""
+    try:
+        user_task_distribution = db_manager.get_user_task_distribution()
+        return jsonify([dict(row) for row in user_task_distribution])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
+@app.route('/api/dashboard/total-projects', methods=['GET'])
+@login_required
+def get_total_projects():
+    """API endpoint for total projects count"""
+    try:
+        total = db_manager.get_total_projects()
+        return jsonify({'total': total})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-# 注册自定义命令行命令
-def register_commands(app):
-    @app.cli.command("init-db")
-    @with_appcontext
-    def init_db_command():
-        """Initialize the database tables."""
-        db.create_all()
-        click.echo("Database tables created.")
+@app.route('/api/dashboard/total-tasks', methods=['GET'])
+@login_required
+def get_total_tasks():
+    """API endpoint for total tasks count"""
+    try:
+        total = db_manager.get_total_tasks()
+        return jsonify({'total': total})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    @app.cli.command("seed-db")
-    @with_appcontext
-    def seed_db_command():
-        """Add seed data to the database."""
-        add_seed_data()
-        click.echo("Seed data added to database.")
+@app.route('/api/dashboard/active-projects', methods=['GET'])
+@login_required
+def get_active_projects():
+    """API endpoint for active projects count"""
+    try:
+        active = db_manager.get_active_projects()
+        return jsonify({'active': active})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-# 单独的假数据创建函数
-def add_seed_data():
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    
-    # 创建默认admin用户 (如果不存在)
-    if not User.query.filter_by(username='admin').first():
-        admin = User(
-            username='admin', 
-            email='admin@example.com', 
-            role='admin',
-            full_name='System Administrator',
-            site='MATS',
-            competency='System Management',
-            title='System Administrator',
-            mobile='00000000000'
-        )
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-        click.echo("Admin user created")
-    
-    # 从JSON文件加载员工数据
-    if not User.query.filter(User.username != 'admin').first():
-        employees_path = os.path.join(base_dir, 'data_demo', 'employees.json')
-        if os.path.exists(employees_path):
-            with open(employees_path, 'r') as f:
-                employees_data = json.load(f)
-            
-            for emp in employees_data:
-                if not User.query.filter_by(username=emp['username']).first():
-                    employee = User(
-                        username=emp['username'],
-                        email=emp['email'],
-                        role='employee',
-                        full_name=emp['full_name'],
-                        site=emp['site'],
-                        competency=emp['competency'],
-                        title=emp['title'],
-                        mobile=emp['mobile']
-                    )
-                    employee.set_password('password123')
-                    db.session.add(employee)
-            
-            db.session.commit()
-            click.echo(f"{len(employees_data)} employees created from JSON")
-        else:
-            click.echo("Employees JSON file not found.")
-    
-    # 从JSON文件加载类别
-    if not Category.query.first():
-        categories_path = os.path.join(base_dir, 'data_demo', 'categories.json')
-        if os.path.exists(categories_path):
-            with open(categories_path, 'r') as f:
-                categories_data = json.load(f)
-            
-            for cat in categories_data:
-                category = Category(
-                    name=cat['name'],
-                    type=cat['type'],
-                    description=cat['description']
-                )
-                db.session.add(category)
-            db.session.commit()
-            click.echo(f"{len(categories_data)} categories created from JSON")
-        else:
-            click.echo("Categories JSON file not found.")
-    
-    # 从JSON文件加载项目
-    if not Project.query.first():
-        projects_path = os.path.join(base_dir, 'data_demo', 'projects.json')
-        if os.path.exists(projects_path):
-            with open(projects_path, 'r') as f:
-                projects_data = json.load(f)
-            
-            categories = Category.query.all()
-            category_map = {cat.name: cat.id for cat in categories}
-            
-            for proj in projects_data:
-                # 获取类别ID
-                category_id = category_map.get(proj['category'])
-                if not category_id:
-                    click.echo(f"Category {proj['category']} not found for project {proj['name']}")
-                    continue
-                    
-                project = Project(
-                    name=proj['name'],
-                    category_id=category_id,
-                    main_rd=proj['main_rd'],
-                    supplier=proj['supplier'],
-                    status=proj['status'] if proj['status'] else 'planning'
-                )
-                db.session.add(project)
-            db.session.commit()
-            click.echo(f"{len(projects_data)} projects created from JSON")
-        else:
-            click.echo("Projects JSON file not found.")
-    
-    # 从JSON文件加载任务（包括评论）
-    if not Task.query.first():
-        tasks_path = os.path.join(base_dir, 'data_demo', 'tasks.json')
-        if os.path.exists(tasks_path):
-            with open(tasks_path, 'r') as f:
-                tasks_data = json.load(f)
-            
-            # 创建用户名到用户ID的映射
-            user_map = {user.username: user.id for user in User.query.all()}
-            # 创建项目名称到项目ID的映射
-            project_map = {project.name: project.id for project in Project.query.all()}
-            
-            for task_data in tasks_data:
-                # 获取分配人ID
-                assignee_id = user_map.get(task_data['assignee_username'])
-                if not assignee_id:
-                    click.echo(f"Assignee {task_data['assignee_username']} not found for task {task_data['title']}")
-                    continue
-                
-                # 获取项目ID
-                project_id = project_map.get(task_data['project_name'])
-                if not project_id:
-                    click.echo(f"Project {task_data['project_name']} not found for task {task_data['title']}")
-                    continue
-                
-                # 创建任务
-                task = Task(
-                    title=task_data['title'],
-                    description=task_data['description'],
-                    type=task_data['type'],
-                    status=task_data['status'],
-                    priority=task_data['priority'],
-                    severity=task_data['severity'],
-                    start_date=datetime.fromisoformat(task_data['start_date']),
-                    due_date=datetime.fromisoformat(task_data['due_date']),
-                    assignee_id=assignee_id,
-                    project_id=project_id
-                )
-                db.session.add(task)
-                db.session.flush()  # 获取任务ID
-                
-                # 添加评论
-                for comment_data in task_data.get('comments', []):
-                    author_id = user_map.get(comment_data['author_username'])
-                    if not author_id:
-                        click.echo(f"Author {comment_data['author_username']} not found for comment in task {task_data['title']}")
-                        continue
-                    
-                    comment = Comment(
-                        content=comment_data['content'],
-                        task_id=task.id,
-                        author_id=author_id,
-                        created_at=datetime.fromisoformat(comment_data['created_at'])
-                    )
-                    db.session.add(comment)
-            
-            db.session.commit()
-            click.echo(f"{len(tasks_data)} tasks with comments created from JSON")
-        else:
-            click.echo("Tasks JSON file not found.")
+@app.route('/api/dashboard/delayed-tasks', methods=['GET'])
+@login_required
+def get_delayed_tasks():
+    """API endpoint for delayed tasks count"""
+    try:
+        delayed = db_manager.get_delayed_tasks()
+        return jsonify({'delayed': delayed})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+#endregion
 
-# 主函数
+# Application Entry Point
 if __name__ == '__main__':
-    # 注册命令行命令
-    register_commands(app)
-    
-    # 运行应用
     app.run(debug=True)

@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "E-Compressor",
+    "type": "product",
+    "description": "Electric Compressor",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 2,
+    "name": "E-CoolingPump",
+    "type": "product",
+    "description": "Electric Cooling Pump",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 3,
+    "name": "E-CoolingFan",
+    "type": "product",
+    "description": "Electric Cooling Fan",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 4,
+    "name": "OBC&DCLV",
+    "type": "product",
+    "description": "On-Board Charger & DC Low Voltage Converter",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 5,
+    "name": "Bootloader",
+    "type": "function",
+    "description": "Bootloader functionality",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 6,
+    "name": "Functional Safety",
+    "type": "function",
+    "description": "Functional Safety",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 7,
+    "name": "CyberSecurity",
+    "type": "function",
+    "description": "Cyber Security",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 8,
+    "name": "Toolchain",
+    "type": "function",
+    "description": "Toolchain",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  },
+  {
+    "id": 9,
+    "name": "Main Task",
+    "type": "function",
+    "description": "Main Task",
+    "status": "active",
+    "created_at": "2025-08-28T10:54:29"
+  }
+]

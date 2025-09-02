@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/task_management.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .loading,
+        .error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            text-align: center;
+        }
+        
+        .loading i,
+        .error i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .logout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logout-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .logout-modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .confirm-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="d-flex justify-content-center mb-5">
+                    <h4 style="color: white; font-weight: 600;">Task Management</h4>
+                </div>
+
+                <div class="user-card">
+                    <div class="user-name">{{ full_name }}</div>
+                    <div class="user-id">{{ userID }}</div>
+                </div>
+
+                <ul class="nav flex-column nav-links">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-page="task" id="taskLink">
+                            <i class="bi bi-list-task"></i> Task Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="dashboard" id="dashboardLink">
+                            <i class="bi bi-bar-chart"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5 logout-link">
+                        <a class="nav-link" href="#" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-md-10 main-content">
+                <div class="container" id="mainContent">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="logout-modal" id="logoutModal" aria-hidden="true">
+        <div class="logout-modal-content">
+            <div class="logout-modal-title">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Confirm Logout</span>
+            </div>
+            <p>Are you sure you want to logout from Task Management System?</p>
+            <div class="logout-modal-buttons">
+                <button class="logout-modal-button confirm-btn" id="confirmLogout">Confirm</button>
+                <button class="logout-modal-button cancel-btn" id="cancelLogout">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variable to store loaded scripts
+        const loadedScripts = {};
+
+        // Initialize after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户角色并控制Dashboard链接显示
+            const isAdmin = "{{ session.title }}" === "System Administrator";
+            console.info("Is Admin (title): ", isAdmin);
+            
+            const dashboardLink = document.getElementById('dashboardLink');
+            const taskLink = document.getElementById('taskLink');
+            
+            // 根据角色显示/隐藏Dashboard链接
+            if (dashboardLink) {
+                dashboardLink.style.display = isAdmin ? 'block' : 'none';
+            }
+            
+            // 导航链接点击事件（添加权限检查）
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetPage = this.getAttribute('data-page');
+                    
+                    // 检查权限 - 修复：使用 title 而不是 role
+                    if (targetPage === 'dashboard' && "{{ session.title }}" !== "System Administrator") {
+                        alert('您没有权限访问仪表板');
+                        return;
+                    }
+                    
+                    // 更新active状态
+                    document.querySelectorAll('.nav-links a').forEach(a => {
+                        a.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // 加载页面
+                    loadPage(targetPage);
+                    
+                    // 更新URL
+                    history.pushState({page: targetPage}, '', `?page=${targetPage}`);
+                });
+            });
+            
+            // 获取URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageParam = urlParams.get('page');
+            
+            // 确定默认加载的页面
+            let loadPageName = 'task';
+            let activeClassName = 'taskLink';
+            
+            if (isAdmin && pageParam === 'dashboard') {
+                loadPageName = 'dashboard';
+                activeClassName = 'dashboardLink';
+            }
+            
+            // 设置活动链接
+            document.getElementById(activeClassName).classList.add('active');
+            
+            // 加载页面
+            loadPage(loadPageName);
+            
+            // Handle back/forward navigation
+            window.addEventListener('popstate', function(event) {
+                if (event.state && event.state.page) {
+                    loadPage(event.state.page);
+                    
+                    // Update active link
+                    document.querySelectorAll('.nav-links a').forEach(a => {
+                        a.classList.remove('active');
+                        if (a.getAttribute('data-page') === event.state.page) {
+                            a.classList.add('active');
+                        }
+                    });
+                }
+            });
+            
+            // Logout button events
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutModal = document.getElementById('logoutModal');
+            const confirmLogout = document.getElementById('confirmLogout');
+            const cancelLogout = document.getElementById('cancelLogout');
+            
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                logoutModal.style.display = 'flex';
+            });
+            
+            confirmLogout.addEventListener('click', function() {
+                // Perform logout API call
+                fetch('/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    } else {
+                        alert('Logout failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    alert('Logout failed. Please try again.');
+                });
+            });
+            
+            cancelLogout.addEventListener('click', function() {
+                logoutModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            logoutModal.addEventListener('click', function(e) {
+                if (e.target === logoutModal) {
+                    logoutModal.style.display = 'none';
+                }
+            });
+        });
+
+        // Load page content
+        function loadPage(pageName) {
+            const contentContainer = document.getElementById('mainContent');
+            contentContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            
+            // 添加Dashboard权限检查 - 修复：使用 title 而不是 role
+            if (pageName === 'dashboard' && "{{ session.title }}" !== "System Administrator") {
+                contentContainer.innerHTML = `
+                    <div class="error text-center py-5">
+                        <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                        <h3>访问受限</h3>
+                        <p>您没有权限访问仪表板页面</p>
+                        <button class="btn btn-primary mt-3" onclick="loadPage('task')">返回任务管理</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Load different content based on page name
+            let pagePath = '';
+            let scriptPath = '';
+            let initFunction = null;
+            
+            switch(pageName) {
+                case 'dashboard':
+                    pagePath = '/api/dashboard';
+                    scriptPath = '/static/js/dashboard.js';
+                    initFunction = 'initDashboard';
+                    break;
+                case 'task':
+                default:
+                    pagePath = '/api/task_manage';
+                    scriptPath = '/static/js/task_manage.js';
+                    initFunction = 'initTaskManagement';
+            }
+            
+            // Fetch page content
+            fetch(pagePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Page load failed (${response.status}): ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    console.log("Fetched HTML for", pageName);
+                    contentContainer.innerHTML = html;
+                    
+                    // 检查脚本是否已加载
+                    if (loadedScripts[scriptPath]) {
+                        console.log("Script already loaded:", scriptPath);
+                        // 如果已加载，直接初始化页面
+                        if (typeof window[initFunction] === 'function') {
+                            console.log("Calling init function:", initFunction);
+                            window[initFunction]();
+                        }
+                        return;
+                    }
+                    
+                    // 加载对应的JS文件
+                    const script = document.createElement('script');
+                    script.src = scriptPath;
+                    script.setAttribute('data-page', pageName);
+                    
+                    script.onload = function() {
+                        console.log("Script loaded successfully:", scriptPath);
+                        // 标记脚本已加载
+                        loadedScripts[scriptPath] = true;
+                        
+                        // 初始化页面
+                        if (typeof window[initFunction] === 'function') {
+                            console.log("Calling init function:", initFunction);
+                            window[initFunction]();
+                        } else {
+                            console.error("Init function not found:", initFunction);
+                        }
+                    };
+                    
+                    script.onerror = function() {
+                        console.error(`${scriptPath} failed to load`);
+                        contentContainer.innerHTML = `
+                            <div class="error">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>脚本加载失败</p>
+                                <p>路径: ${scriptPath}</p>
+                                <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">重试</button>
+                            </div>
+                        `;
+                    };
+                    
+                    console.log("Loading script:", scriptPath);
+                    document.body.appendChild(script);
+                })
+                .catch(error => {
+                    console.error('Page load failed:', error);
+                    contentContainer.innerHTML = `
+                        <div class="error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>页面加载失败，请重试</p>
+                            <p>错误: ${error.message}</p>
+                            <button class="btn btn-primary mt-3" onclick="loadPage('${pageName}')">重试</button>
+                        </div>
+                    `;
+                });
+        }
+    </script>
+</body>
+</html>
