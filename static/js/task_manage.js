@@ -35,15 +35,15 @@ function initTaskManagement() {
     function formatDateTimeForInput(dateString) {
         if (!dateString) return '';
         try {
-            const date = new Date(dateString);
+            const date        = new Date(dateString);
             const beijingTime = date.getTime() + 8 * 60 * 60 * 1000;
             const beijingDate = new Date(beijingTime);
-            const year = beijingDate.getUTCFullYear();
-            const month = String(beijingDate.getUTCMonth() + 1).padStart(2, '0');
-            const day = String(beijingDate.getUTCDate()).padStart(2, '0');
-            const hours = String(beijingDate.getUTCHours()).padStart(2, '0');
-            const minutes = String(beijingDate.getUTCMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}`;
+            const year        = beijingDate.getUTCFullYear();
+            const month       = String(beijingDate.getUTCMonth() + 1).padStart(2, '0');
+            const day         = String(beijingDate.getUTCDate()).padStart(2, '0');
+            const hours       = String(beijingDate.getUTCHours()).padStart(2, '0');
+            const minutes     = String(beijingDate.getUTCMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         } catch (e) {
             console.warn('Invalid date format', dateString);
             return '';
@@ -60,13 +60,28 @@ function initTaskManagement() {
         };
     }
 
-    function populateDropdown(elementId, items, primaryField, fallbackField = null) {
+    function populateDropdown(elementId, items, primaryField, fallbackField = null, isAdmin = true) {
         const dropdown = document.getElementById(elementId);
         if (!dropdown) return;
-        while (dropdown.options.length > 1) dropdown.remove(1);
+        
+        if (isAdmin) {
+            console.info("Admin")
+            const allOption = document.createElement('option');
+            allOption.value = 'all';
+            allOption.textContent = 'All Assignees';
+            dropdown.appendChild(allOption);
+        } else {
+            console.info("Not admin")
+            if (elementId === 'assigneeFilter') {
+                dropdown.innerHTML = '';
+            }
+        }
+
+        
+        // 添加项目选项
         items.forEach(item => {
             const option = document.createElement('option');
-            option.value = item.id;
+            option.value = item.id || item.username; // 兼容不同API返回结构
             option.textContent = item[primaryField] || (fallbackField && item[fallbackField]) || `Item ${item.id}`;
             dropdown.appendChild(option);
         });
@@ -113,10 +128,43 @@ function initTaskManagement() {
     // Data loaders
     // ==================================================================
     function loadUsers() {
-        fetch('/api/users')
-            .then(response => { if (!response.ok) throw new Error(`Failed to load users: ${response.status}`); return response.json(); })
-            .then(users => { populateDropdown('assigneeFilter', users, 'full_name', 'username'); populateDropdown('assignee', users, 'full_name', 'username'); })
-            .catch(error => { console.error('Error loading users:', error); showErrorNotification('Failed to load users. Please try again later.'); });
+        // 获取当前用户信息
+        const currentId        = document.getElementById('currentId').value;
+        const currentUserId    = document.getElementById('currentUserId').value;
+        const currentUserName  = document.getElementById('currentUserName').value;
+        const currentFullName  = document.getElementById('currentFullName').value;
+        const currentUserTitle = document.getElementById('currentUserTitle').value;
+        
+        // 检查用户是否是系统管理员
+        if (currentUserTitle === "System Administrator") {
+            // 管理员：加载所有用户
+            fetch('/api/users')
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to load users: ${response.status}`);
+                    return response.json();
+                })
+                .then(users => {
+                    console.info("users", users)
+                    populateDropdown('assigneeFilter', users, 'full_name', 'username');
+                    populateDropdown('assignee', users, 'full_name', 'username');
+                })
+                .catch(error => {
+                    console.error('Error loading users:', error);
+                    showErrorNotification('Failed to load users. Please try again later.');
+                });
+        } else {
+            // 非管理员：只显示当前用户
+            const currentUser = [{
+                id       : currentId,
+                userID   : currentUserId,
+                username : currentUserName,
+                full_name: currentFullName,
+                title    : currentUserTitle,
+            }];
+            
+            populateDropdown('assigneeFilter', currentUser, 'full_name', 'username', false);
+            populateDropdown('assignee', currentUser, 'full_name', 'username', false);
+        }
     }
 
     function loadProjects() {
@@ -127,17 +175,19 @@ function initTaskManagement() {
     }
 
     function loadTasks() {
-        const params = new URLSearchParams();
-        const status = document.getElementById('statusFilter')?.value;
+        const params   = new URLSearchParams();
+        const status   = document.getElementById('statusFilter')?.value;
         const assignee = document.getElementById('assigneeFilter')?.value;
-        const project = document.getElementById('projectFilter')?.value;
+        const project  = document.getElementById('projectFilter')?.value;
         const priority = document.getElementById('priorityFilter')?.value;
-        const text = document.getElementById('textSearch')?.value;
+        const text     = document.getElementById('textSearch')?.value;
+
         if (status && status !== 'all') params.append('status', status);
         if (assignee && assignee !== 'all') params.append('assignee', assignee);
         if (project && project !== 'all') params.append('project', project);
         if (priority && priority !== 'all') params.append('priority', priority);
         if (text) params.append('search_text', text);
+        
         fetch(`/api/tasks?${params.toString()}`)
             .then(response => { if (!response.ok) throw new Error(`Failed to load tasks: ${response.status}`); return response.json(); })
             .then(data => { tasks = data.tasks || data; sortTasks(); renderTasksTable(tasks); })
@@ -223,10 +273,14 @@ function initTaskManagement() {
             let formattedDate = 'Unknown date';
             try { const date = new Date(comment.created_at); formattedDate = date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); } catch (e) { console.warn('Invalid date format for comment', comment); }
             const authorName = comment.author?.full_name || comment.author?.username || 'Unknown User';
+            
+            // <div class="comment-author">${authorName}</div>
             commentCard.innerHTML = `
                 <div class="comment-header">
-                    <div class="comment-author">${authorName}</div>
                     <div class="comment-date">${formattedDate}</div>
+                    <button class="action-btn delete-btn" data-id="${comment.id}" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </div>
                 <div class="comment-content">${comment.content || 'No content'}</div>
             `;
@@ -250,43 +304,104 @@ function initTaskManagement() {
         });
     }
 
+    // Load task details
     function loadTaskDetails(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
+        // Fetch task details from API
+        fetch(`/api/tasks/${taskId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to load task details');
+                return response.json();
+            })
+            .then(task => {
+                // Update task in global tasks array
+                const index = tasks.findIndex(t => t.id === taskId);
+                if (index !== -1) {
+                    tasks[index] = task; 
+                }
+                
+                // Render task details
+                renderTaskDetails(task);
+            })
+            .catch(error => {
+                console.error('Error loading task details:', error);
+                showNotification('Failed to load task details', 'error');
+            });
+    }
+
+    // Render task details view
+    function renderTaskDetails(task) {
         const container = document.getElementById('taskDetailContainer');
+        if (!container) return;
+        
         container.style.display = 'block';
-        document.getElementById('taskDetailTitle').textContent       = task.title || 'Untitled Task';
-        document.getElementById('taskDetailDescription').textContent = task.description || 'No description provided';
-        document.getElementById('taskDetailStatus').className        = `status-badge ${getStatusClass(task.status)}`;
-        document.getElementById('taskDetailStatus').textContent      = getStatusText(task.status);
-        document.getElementById('taskDetailPriority').className      = `badge ${getPriorityClass(task.priority)}`;
-        document.getElementById('taskDetailPriority').textContent    = getPriorityText(task.priority);
-        document.getElementById('taskDetailType').textContent        = task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'Unknown';
-        document.getElementById('taskDetailSeverity').textContent    = task.severity ? task.severity.charAt(0).toUpperCase() + task.severity.slice(1) : 'Unknown';
-        document.getElementById('taskDetailCreated').textContent     = formatDate(task.created_at);
-        document.getElementById('taskDetailUpdated').textContent     = formatDate(task.updated_at);
+        
+        // Basic task info
+        document.getElementById('taskDetailTitle').textContent = task.title || 'Untitled Task';
+        document.getElementById('taskDetailDescription').textContent = task.description || 'No description';
+        
+        // Status and priority
+        document.getElementById('taskDetailStatus').className = `badge ${getStatusClass(task.status)}`;
+        document.getElementById('taskDetailStatus').textContent = getStatusText(task.status);
+        document.getElementById('taskDetailPriority').className = `badge ${getPriorityClass(task.priority)}`;
+        document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority);
+        
+        // Type and severity
+        document.getElementById('taskDetailType').textContent = task.type ? 
+            task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'Unknown';
+        document.getElementById('taskDetailSeverity').textContent = task.severity ? 
+            task.severity.charAt(0).toUpperCase() + task.severity.slice(1) : 'Unknown';
+        
+        // Dates
+        document.getElementById('taskDetailCreated').textContent = formatDate(task.created_at);
+        document.getElementById('taskDetailUpdated').textContent = formatDate(task.updated_at);
+        document.getElementById('taskDetailStartDate').textContent = formatDate(task.start_date);
+        document.getElementById('taskDetailDueDate').textContent = formatDate(task.due_date);
+        
+        // Project and category info
         const projectName = task.project?.name || 'No Project';
         const categoryName = task.project?.category?.name || 'No Category';
         const categoryType = task.project?.category?.type || '';
         document.getElementById('taskDetailProject').textContent = projectName;
         document.getElementById('taskDetailCategory').textContent = `${categoryName}${categoryType ? ` (${categoryType})` : ''}`;
+        
+        // Assignee info
         const assigneeName = task.assignee?.full_name || task.assignee?.username || 'Unassigned';
-        document.getElementById('taskDetailAssignee').textContent  = assigneeName;
-        document.getElementById('taskDetailStartDate').textContent = formatDate(task.start_date);
-        document.getElementById('taskDetailDueDate').textContent   = formatDate(task.due_date);
+        document.getElementById('taskDetailAssignee').textContent = assigneeName;
+        
+        // Setup edit button
+        const editBtn = document.getElementById('editTaskBtn');
+        if (editBtn) {
+            editBtn.onclick = () => openTaskModal(task.id);
+        }
     }
-
+    
     // ==================================================================
     // Event listeners & UI actions
     // ==================================================================
     function resetFilters() {
+        // 获取当前用户信息
+        const currentUserTitle = document.getElementById('currentUserTitle').value;
+        const isAdmin          = currentUserTitle === "System Administrator";
+        const currentId        = document.getElementById('currentId').value;
+        
+        // 重置通用过滤器
         document.getElementById('statusFilter').value   = 'all';
-        document.getElementById('assigneeFilter').value = 'all';
         document.getElementById('projectFilter').value  = 'all';
         document.getElementById('priorityFilter').value = 'all';
         document.getElementById('textSearch').value     = '';
+        
+        // 特殊处理Assignee过滤器
+        if (isAdmin) {
+            document.getElementById('assigneeFilter').value = 'all';
+        } else {
+            // 非管理员只能选择自己
+            document.getElementById('assigneeFilter').value = currentId;
+        }
+        
+        // 重新加载任务
         loadTasks();
     }
+
 
     function closeTaskDetail() {
         const scrollContainer = document.getElementById('tasksScrollContainer');
@@ -319,8 +434,18 @@ function initTaskManagement() {
         const createBtn      = document.getElementById('createTaskBtn'); if (createBtn) createBtn.addEventListener('click', () => openTaskModal());
         const editBtn        = document.getElementById('editTaskBtn'); if (editBtn) editBtn.addEventListener('click', () => openTaskModal(selectedTaskId));
         const submitBtn      = document.getElementById('submitTaskForm'); if (submitBtn) submitBtn.addEventListener('click', handleTaskSubmission);
+        const cancelBtn      = document.getElementById('cancelbtn'); if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
         const closeDetail    = document.getElementById('closeDetailBtn'); if (closeDetail) closeDetail.addEventListener('click', closeTaskDetail);
         const addCommentForm = document.getElementById('addCommentForm'); if (addCommentForm) addCommentForm.addEventListener('submit', function(e){ e.preventDefault(); addComment(); });
+        document.getElementById('commentsContainer').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                const btn = e.target.closest('.delete-btn');
+                const commentId = btn.dataset.id;
+                if (commentId) {
+                    deleteComment(commentId);
+                }
+            }
+        });
     }
 
     // ==================================================================
@@ -361,41 +486,176 @@ function initTaskManagement() {
             .catch(error => { console.error('Error adding comment:', error); alert('Failed to add comment. Please try again later.'); });
     }
 
+    function deleteComment(commentId) {
+        if (!confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
+            return;
+        }
+        
+        fetch(`/api/comments/${commentId}`, {
+            method: 'DELETE',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                // 删除成功后重新加载当前任务的评论
+                const selectedRow = document.querySelector('#tasksTableBody tr.selected');
+                if (selectedRow) {
+                    const taskId = parseInt(selectedRow.dataset.taskId);
+                    loadComments(taskId);
+                }
+            } else {
+                const ct = response.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    return response.json().then(j => { throw new Error(j.error || 'Failed to delete comment'); });
+                }
+                return response.text().then(t => { throw new Error(t || 'Failed to delete comment'); });
+            }
+        })
+        .catch(error => { 
+            console.error('Error deleting comment:', error); 
+            alert('Failed to delete comment. Please try again later.'); 
+        });
+    }
+
     // ==================================================================
     // Modal & CRUD
     // ==================================================================
+    // Open task modal for create/edit
     function openTaskModal(taskId) {
-        const modalEl = document.getElementById('taskModal'); const modal = new bootstrap.Modal(modalEl); const modalTitle = document.getElementById('taskModalLabel'); const taskIdInput = document.getElementById('taskId');
-        document.getElementById('taskForm').reset(); taskIdInput.value = '';
+        const modalEl     = document.getElementById('taskModal');
+        const modal       = new bootstrap.Modal(modalEl);
+        const modalTitle  = document.getElementById('taskModalLabel');
+        const taskIdInput = document.getElementById('taskId');
+        
+        document.getElementById('taskForm').reset(); 
+        taskIdInput.value = '';
+        
         if (taskId) {
-            isEditing = true; modalTitle.textContent = 'Edit Task'; taskIdInput.value = taskId;
-            fetch(`/api/tasks/${taskId}`).then(response => { if (!response.ok) throw new Error('Failed to load task'); return response.json(); }).then(task => {
-                document.getElementById('title').value       = task.title || '';
-                document.getElementById('description').value = task.description || '';
-                document.getElementById('type').value        = task.type || 'task';
-                document.getElementById('priority').value    = task.priority || 'medium';
-                document.getElementById('severity').value    = task.severity || 'normal';
-                document.getElementById('status').value      = task.status || 'todo';
-                const assigneeSelect = document.getElementById('assignee'); if (assigneeSelect) assigneeSelect.value = task.assignee?.id || '';
-                const projectSelect = document.getElementById('project'); if (projectSelect) projectSelect.value = task.project?.id || '';
-                document.getElementById('start_date').value = formatDateTimeForInput(task.start_date);
-                document.getElementById('due_date').value = formatDateTimeForInput(task.due_date);
-            }).catch(handleError('Failed to load task details'));
-        } else { isEditing = false; modalTitle.textContent = 'Create New Task'; }
+            isEditing = true; 
+            modalTitle.textContent = 'Edit Task'; 
+            taskIdInput.value = taskId;
+            
+            fetch(`/api/tasks/${taskId}`)
+                .then(response => { 
+                    if (!response.ok) throw new Error('Failed to load task'); 
+                    return response.json(); 
+                })
+                .then(task => {
+                    document.getElementById('title').value       = task.title || '';
+                    document.getElementById('description').value = task.description || '';
+                    document.getElementById('type').value        = task.type || 'task';
+                    document.getElementById('priority').value    = task.priority || 'medium';
+                    document.getElementById('severity').value    = task.severity || 'normal';
+                    document.getElementById('status').value      = task.status || 'todo';
+                    
+                    const assigneeSelect = document.getElementById('assignee'); 
+                    if (assigneeSelect) assigneeSelect.value = task.assignee?.id || '';
+                    
+                    const projectSelect = document.getElementById('project'); 
+                    if (projectSelect) projectSelect.value = task.project?.id || '';
+                    
+                    document.getElementById('start_date').value = formatDateTimeForInput(task.start_date);
+                    document.getElementById('due_date').value   = formatDateTimeForInput(task.due_date);
+                })
+                .catch(handleError('Failed to load task details'));
+        } else { 
+            isEditing = false; 
+            modalTitle.textContent = 'Create New Task'; 
+            const today = new Date();
+            const formattedDate = formatDateTimeForInput(today.toISOString().split('T')[0]);  // 直接获取ISO日期
+            document.getElementById('start_date').value = formattedDate;
+            
+        }
+        
         modal.show();
     }
 
+    // Handle task submission (create/update)
     function handleTaskSubmission() {
-        const form       = document.getElementById('taskForm'); const formData                                           = new FormData(form); const taskId = formData.get('id');
-        const taskData   = { title: formData.get('title'), description: formData.get('description'), type: formData.get('type'), status: formData.get('status'), priority: formData.get('priority'), severity: formData.get('severity'), project_id: parseInt(formData.get('project_id') || formData.get('project')) };
-        const assigneeId = formData.get('assignee_id') || formData.get('assignee'); if (assigneeId) taskData.assignee_id = parseInt(assigneeId);
-        const startDate  = formData.get('start_date'); if (startDate) taskData.start_date                                = new Date(startDate).toISOString();
-        const dueDate    = formData.get('due_date'); if (dueDate) taskData.due_date                                      = new Date(dueDate).toISOString();
-        const url        = taskId ? `/api/tasks/${taskId}` : '/api/tasks'; const method                                  = taskId ? 'PUT' : 'POST';
-        fetch(url, { method: method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(taskData) })
-            .then(response => { if (!response.ok) throw new Error('Task operation failed'); return response.json(); })
-            .then(() => { const modalEl = document.getElementById('taskModal'); const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl); modalInstance.hide(); loadTasks(); if (taskId && selectedTaskId === parseInt(taskId)) loadTaskDetails(selectedTaskId); showNotification(isEditing ? 'Task updated successfully!' : 'Task created successfully!'); })
-            .catch(handleError(isEditing ? 'Failed to update task' : 'Failed to create task'));
+        const form = document.getElementById('taskForm');
+        const formData = new FormData(form);
+        const taskId = formData.get('id');
+        const isEditing = !!taskId;
+        
+        // Prepare task data
+        const taskData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            type: formData.get('type'),
+            status: formData.get('status'),
+            priority: formData.get('priority'),
+            severity: formData.get('severity'),
+            project_id: parseInt(formData.get('project_id') || formData.get('project'))
+        };
+        
+        // Handle optional fields
+        const assigneeId = formData.get('assignee_id') || formData.get('assignee');
+        if (assigneeId) taskData.assignee_id = parseInt(assigneeId);
+        
+        const startDate = formData.get('start_date');
+        if (startDate) taskData.start_date = new Date(startDate).toISOString();
+        
+        const dueDate = formData.get('due_date');
+        if (dueDate) taskData.due_date = new Date(dueDate).toISOString();
+        
+        const url = taskId ? `/api/tasks/${taskId}` : '/api/tasks';
+        const method = taskId ? 'PUT' : 'POST';
+        
+        fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(taskData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || 'Task operation failed');
+                });
+            }
+            return response.json();
+        })
+        .then(updatedTask => {
+            closeModal();
+            // Refresh task list
+            loadTasks();
+            
+            // Refresh task details for edited task
+            if (taskId) {
+                loadTaskDetails(taskId);
+            } else {
+                // For new task, select it in the list
+                setTimeout(() => {
+                    const newTaskRow = document.querySelector(`tr[data-task-id="${updatedTask.id}"]`);
+                    if (newTaskRow) {
+                        newTaskRow.click();
+                    }
+                }, 300);
+            }
+            
+            // Show success notification
+            showNotification(isEditing ? 'Task updated successfully!' : 'Task created successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Task operation error:', error);
+            showNotification(`Failed to ${isEditing ? 'update' : 'create'} task: ${error.message}`, 'error');
+        });
+    }
+
+    function closeModal() {
+        // Close modal
+        const modalEl = document.getElementById('taskModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+            
+            // FIX: Manually remove modal backdrop
+            const modalBackdrops = document.getElementsByClassName('modal-backdrop');
+            for (let i = 0; i < modalBackdrops.length; i++) {
+                modalBackdrops[i].remove();
+            }
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+        }
     }
 
     // ==================================================================

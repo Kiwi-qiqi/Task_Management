@@ -106,7 +106,23 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(34, 45, 96, 0.2);
 }
-
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-light);
+}
+.delete-btn:hover {
+    color: var(--danger);
+    background-color: rgba(244, 67, 54, 0.1);
+}
 .content-container {
     display: flex;
     flex-direction: column;

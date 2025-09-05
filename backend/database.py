@@ -54,7 +54,7 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute(
                 'SELECT id, userID, username, email, role, full_name, site, competency, title, mobile '
-                'FROM users WHERE is_active = 1'
+                'FROM users WHERE is_active = 1 AND id!=1'
             )
             return cursor.fetchall()
     
@@ -73,6 +73,57 @@ class DatabaseManager:
             ''')
             return cursor.fetchall()
     
+    def add_task(self, task_data):
+        """Insert a new task into the database and return the task id."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute('''
+                    INSERT INTO tasks (
+                        title, description, type, status, priority, severity, 
+                        start_date, due_date, assignee_id, project_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    task_data['title'],
+                    task_data['description'],
+                    task_data['type'],
+                    task_data['status'],
+                    task_data['priority'],
+                    task_data['severity'],
+                    task_data['start_date'],
+                    task_data['due_date'],
+                    task_data['assignee_id'],
+                    task_data['project_id']
+                ))
+                conn.commit()
+                return cursor.lastrowid
+            except sqlite3.Error as e:
+                conn.rollback()
+                return None
+
+    def get_task_by_id(self, task_id):
+        """Return a single task by ID as a dictionary."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    t.id, t.title, t.description, t.type, t.status, t.priority, t.severity,
+                    t.start_date, t.due_date, t.created_at, t.updated_at,
+                    t.assignee_id, t.project_id,
+                    u.username AS assignee_username, u.full_name AS assignee_full_name,
+                    p.name AS project_name,
+                    c.name AS category_name, c.type AS category_type
+                FROM tasks t
+                LEFT JOIN users u ON t.assignee_id = u.id
+                JOIN projects p ON t.project_id = p.id
+                JOIN categories c ON p.category_id = c.id
+                WHERE t.id = ?
+            ''', (task_id,))
+            row = cursor.fetchone()
+            if row:
+                return dict(row)
+            return None
+        
     def get_tasks(self, filters=None):
         """Return tasks with optional filtering.
 
@@ -159,7 +210,68 @@ class DatabaseManager:
                 ORDER BY c.created_at DESC
             ''', (task_id,))
             return cursor.fetchall()
+        
+    def get_comment_by_ID(self, comment_id):
+        """Return comment by comment_id as a dictionary."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    c.id, c.content, c.created_at, c.task_id, c.author_id,
+                    u.id as author_db_id, 
+                    u.userID as author_userID, 
+                    u.username as author_username, 
+                    u.full_name as author_full_name
+                FROM comments c
+                JOIN users u ON c.author_id = u.id
+                WHERE c.id = ?
+            ''', (comment_id,))
+            row = cursor.fetchone()
+            if row:
+                # 将 Row 对象转换为字典
+                return dict(row)
+            return None
 
+    def get_comment_with_attachments_by_ID(self, comment_id):
+        """Return comment by comment_id with attachments as a dictionary."""
+        # 获取评论基本信息
+        comment = self.get_comment_by_ID(comment_id)
+        if not comment:
+            return None
+        
+        # 获取相关附件
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    id, filename, filepath, content_type, created_at
+                FROM attachments
+                WHERE comment_id = ?
+            ''', (comment_id,))
+            attachments = cursor.fetchall()
+        
+        # 将附件列表添加到评论字典
+        comment['attachments'] = []
+        for att in attachments:
+            # 将每个附件转换为字典
+            comment['attachments'].append(dict(att))
+        
+        return comment
+    
+    def delete_attachments_for_comment(self, comment_id):
+        """删除评论的所有附件记录"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM attachments WHERE comment_id = ?', (comment_id,))
+            conn.commit()
+
+    def delete_comment(self, comment_id):
+        """删除评论记录"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM comments WHERE id = ?', (comment_id,))
+            conn.commit()
+            
     # ---------- Attachment helpers ----------
     def add_attachment(self, comment_id, filename, filepath, content_type=None):
         """Insert attachment metadata and return its id.
@@ -261,46 +373,37 @@ class DatabaseManager:
             conn.commit()
             return cursor.lastrowid
     
-    def update_task(self, task_id, task_data):
-        """Update an existing task identified by `task_id`.
-
-        The `task_data` dict uses the same fields as `create_task`. The
-        function returns True when an existing row was updated, otherwise
-        False.
+    def update_task(self, task_id, update_data):
+        """Update an existing task in the database.
+        Returns True if successful, False otherwise.
         """
+        # 只更新允许的字段
+        allowed_fields = {
+            'title', 'description', 'type', 'status', 'priority', 'severity',
+            'start_date', 'due_date', 'assignee_id', 'project_id'
+        }
+        
+        # 过滤update_data，只保留允许的字段
+        update_fields = {k: v for k, v in update_data.items() if k in allowed_fields}
+        
+        if not update_fields:
+            return False
+            
+        set_clause = ', '.join([f"{field} = ?" for field in update_fields])
+        values = list(update_fields.values())
+        values.append(task_id)  # 添加task_id作为WHERE子句的条件
+        
+        query = f"UPDATE tasks SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+        
         with self.get_connection() as conn:
             cursor = conn.cursor()
-
-            # Normalize incoming date fields similar to create_task
-            start_date = task_data.get('start_date')
-            due_date = task_data.get('due_date')
-
-            if start_date:
-                start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00')).isoformat()
-            if due_date:
-                due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00')).isoformat()
-
-            cursor.execute('''
-                UPDATE tasks
-                SET title = ?, description = ?, type = ?, status = ?, priority = ?, severity = ?,
-                    start_date = ?, due_date = ?, assignee_id = ?, project_id = ?, updated_at = ?
-                WHERE id = ?
-            ''', (
-                task_data['title'],
-                task_data.get('description'),
-                task_data.get('type'),
-                task_data.get('status'),
-                task_data.get('priority'),
-                task_data.get('severity'),
-                start_date,
-                due_date,
-                task_data.get('assignee_id'),
-                task_data['project_id'],
-                datetime.now().isoformat(),
-                task_id
-            ))
-            conn.commit()
-            return cursor.rowcount > 0
+            try:
+                cursor.execute(query, values)
+                conn.commit()
+                return cursor.rowcount > 0  # 如果更新了一行则返回True
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False
     
     def get_project_task_counts(self):
         """Return top 10 projects with their task counts.

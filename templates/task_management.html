@@ -11,6 +11,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <input type="hidden" id="currentId" value="{{ session.id }}">
+    <input type="hidden" id="currentUserId" value="{{ session.userID }}">
+    <input type="hidden" id="currentUserName" value="{{ session.username }}">
+    <input type="hidden" id="currentFullName" value="{{ session.full_name }}">
+    <input type="hidden" id="currentUserTitle" value="{{ session.title }}">
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -150,10 +155,10 @@
             });
             
             // Logout button events
-            const logoutBtn = document.getElementById('logoutBtn');
-            const logoutModal = document.getElementById('logoutModal');
+            const logoutBtn     = document.getElementById('logoutBtn');
+            const logoutModal   = document.getElementById('logoutModal');
             const confirmLogout = document.getElementById('confirmLogout');
-            const cancelLogout = document.getElementById('cancelLogout');
+            const cancelLogout  = document.getElementById('cancelLogout');
             
             if (logoutBtn && logoutModal) {
                 logoutBtn.addEventListener('click', function(e) {

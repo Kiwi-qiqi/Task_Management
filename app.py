@@ -48,8 +48,8 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if 'userID' not in session:
-            if request.path.startswith('/api'):
-                return jsonify({'error': 'Authentication required'}), 401
+            # if request.path.startswith('/api'):
+            #     return jsonify({'error': 'Authentication required'}), 401
             return redirect(url_for('login'))
         return view(**kwargs)
     return wrapped_view
@@ -129,7 +129,7 @@ def task_manage():
     return render_template('task_manage.html')
 #endregion
 
-#region API Routes - User Management
+#region User Management
 @app.route('/api/users', methods=['GET'])
 @login_required
 def get_users_api():
@@ -141,7 +141,7 @@ def get_users_api():
         return jsonify({'error': str(e)}), 500
 #endregion
 
-#region API Routes - Project Management
+#region Project Management
 @app.route('/api/projects', methods=['GET'])
 @login_required
 def get_projects_api():
@@ -161,17 +161,18 @@ def get_projects_api():
         return jsonify({'error': str(e)}), 500
 #endregion
 
-#region API Routes - Task Management
+#region Task Management
+
 @app.route('/api/tasks', methods=['GET'])
 @login_required
 def get_tasks_api():
     """API endpoint to retrieve tasks with optional filters"""
     try:
         filters = {
-            'status': request.args.get('status'),
-            'assignee': request.args.get('assignee'),
-            'project': request.args.get('project'),
-            'priority': request.args.get('priority'),
+            'status'     : request.args.get('status'),
+            'assignee'   : request.args.get('assignee'),
+            'project'    : request.args.get('project'),
+            'priority'   : request.args.get('priority'),
             'search_text': request.args.get('search_text')
         }
         
@@ -197,24 +198,156 @@ def get_tasks_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
-@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+@app.route('/api/tasks', methods=['POST'])
 @login_required
-def update_task_api(task_id):
-    """API endpoint to update an existing task"""
+def create_task_api():
+    """API endpoint to create a new task"""
     try:
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-
-        success = db_manager.update_task(task_id, data)
-        if success:
-            return jsonify({'message': 'Task updated successfully'})
-        else:
-            return jsonify({'error': 'Task not found'}), 404
+        
+        # 验证必填字段
+        required_fields = ['title', 'project_id']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # 设置默认值
+        task_data = {
+            'title'      : data['title'],
+            'description': data.get('description', ''),
+            'type'       : data.get('type'),
+            'status'     : data.get('status', 'todo'),
+            'priority'   : data.get('priority', 'medium'),
+            'severity'   : data.get('severity', 'normal'),
+            'start_date' : data.get('start_date'),
+            'due_date'   : data.get('due_date'),
+            'assignee_id': data.get('assignee_id'),
+            'project_id' : data['project_id']
+        }
+        
+        # 创建任务
+        task_id = db_manager.add_task(task_data)
+        if not task_id:
+            return jsonify({'error': 'Failed to create task'}), 500
+        
+        # 获取新创建的任务详情
+        new_task = db_manager.get_task_by_id(task_id)
+        if not new_task:
+            return jsonify({'error': 'Task created but failed to retrieve details'}), 500
+        
+        return jsonify(dict(new_task)), 201
     except Exception as e:
+        app.logger.exception('Error creating task')
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/tasks/<int:task_id>', methods=['GET', 'PUT'])
+@login_required
+def task_api(task_id):
+    if request.method == 'GET':
+        """API endpoint to get a single task by ID"""
+        try:
+            task = db_manager.get_task_by_id(task_id)
+            if not task:
+                return jsonify({'error': 'Task not found'}), 404
+                
+            # 格式化响应数据
+            task_dict = dict(task)
+            
+            # 创建分配者信息
+            assignee_info = {
+                'id': task_dict.get('assignee_id'),
+                'username': task_dict.pop('assignee_username', ''),
+                'full_name': task_dict.pop('assignee_full_name', '')
+            }
+            
+            # 创建项目信息
+            project_info = {
+                'id': task_dict.get('project_id'),
+                'name': task_dict.pop('project_name', ''),
+                'category': {
+                    'name': task_dict.pop('category_name', ''),
+                    'type': task_dict.pop('category_type', '')
+                }
+            }
+            
+            return jsonify({
+                **task_dict,
+                'assignee': assignee_info,
+                'project': project_info
+            })
+        except Exception as e:
+            app.logger.exception(f'Error getting task {task_id}')
+            return jsonify({'error': str(e)}), 500
+            
+    elif request.method == 'PUT':
+        """API endpoint to update an existing task"""
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+
+            # 验证任务是否存在
+            existing_task = db_manager.get_task_by_id(task_id)
+            if not existing_task:
+                return jsonify({'error': 'Task not found'}), 404
+            
+            # 准备更新数据
+            update_data = {}
+            allowed_fields = [
+                'title', 'description', 'type', 'status', 'priority', 'severity',
+                'start_date', 'due_date', 'assignee_id', 'project_id'
+            ]
+            
+            # 只更新允许的字段和实际变化的字段
+            for field in allowed_fields:
+                if field in data and data[field] != existing_task.get(field):
+                    update_data[field] = data[field]
+            
+            # 如果没有需要更新的字段
+            if not update_data:
+                return jsonify({'message': 'No changes detected'}), 200
+            
+            # 更新任务
+            success = db_manager.update_task(task_id, update_data)
+            if success:
+                # 获取更新后的任务详情
+                updated_task = db_manager.get_task_by_id(task_id)
+                if updated_task:
+                    # 格式化响应数据
+                    task_dict = dict(updated_task)
+                    
+                    # 创建分配者信息
+                    assignee_info = {
+                        'id': task_dict.get('assignee_id'),
+                        'username': task_dict.pop('assignee_username', ''),
+                        'full_name': task_dict.pop('assignee_full_name', '')
+                    }
+                    
+                    # 创建项目信息
+                    project_info = {
+                        'id': task_dict.get('project_id'),
+                        'name': task_dict.pop('project_name', ''),
+                        'category': {
+                            'name': task_dict.pop('category_name', ''),
+                            'type': task_dict.pop('category_type', '')
+                        }
+                    }
+                    
+                    return jsonify({
+                        **task_dict,
+                        'assignee': assignee_info,
+                        'project': project_info
+                    })
+                return jsonify({'message': 'Task updated successfully'})
+            else:
+                return jsonify({'error': 'Failed to update task'}), 500
+        except Exception as e:
+            app.logger.exception(f'Error updating task {task_id}')
+            return jsonify({'error': str(e)}), 500
+        
  
 @app.route('/api/tasks/<int:task_id>/comments', methods=['POST'])
 @login_required
@@ -251,13 +384,18 @@ def add_comment_api(task_id):
             for f in files:
                 if f and f.filename:
                     filename = secure_filename(f.filename)
-                    task_folder = os.path.join(app.config['UPLOAD_FOLDER'], f'task_{task_id}')
-                    os.makedirs(task_folder, exist_ok=True)
-                    dest_path = os.path.join(task_folder, filename)
-                    f.save(dest_path)
+                    # 创建相对于UPLOAD_FOLDER的路径
+                    relative_task_path = f'task_{task_id}'
+                    relative_file_path = os.path.join(relative_task_path, filename)
+                    
+                    # 实际保存文件的绝对路径
+                    abs_task_folder = os.path.join(app.config['UPLOAD_FOLDER'], relative_task_path)
+                    os.makedirs(abs_task_folder, exist_ok=True)
+                    abs_dest_path = os.path.join(abs_task_folder, filename)
+                    f.save(abs_dest_path)
 
-                    # Record attachment metadata in DB
-                    attachment_id = db_manager.add_attachment(comment_id, filename, dest_path, f.content_type)
+                    # 在数据库中存储相对路径
+                    attachment_id = db_manager.add_attachment(comment_id, filename, relative_file_path, f.content_type)
                     download_url = url_for('download_attachment', attachment_id=attachment_id)
                     uploaded_files.append({'id': attachment_id, 'filename': filename, 'download_url': download_url})
 
@@ -308,6 +446,42 @@ def get_comments_api(task_id):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
+@login_required
+def delete_comment(comment_id):
+    try:
+        # 获取评论及其附件信息
+        comment = db_manager.get_comment_with_attachments_by_ID(comment_id)
+        if not comment:
+            return jsonify({'error': 'Comment not found'}), 404
+            
+        # 检查当前用户是否有权限删除该评论
+        current_user_id = session.get('id')
+        # 使用正确的作者ID字段
+        if comment.get('author_id') != current_user_id:
+            return jsonify({'error': 'Unauthorized to delete this comment'}), 403
+            
+        # 删除物理文件
+        if 'attachments' in comment:
+            for att in comment['attachments']:
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], att['filepath'])
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                except Exception as e:
+                    app.logger.error(f"Error deleting file {file_path}: {str(e)}")
+        
+        # 删除数据库中的附件记录
+        db_manager.delete_attachments_for_comment(comment_id)
+        
+        # 删除评论本身
+        db_manager.delete_comment(comment_id)
+        
+        return jsonify({'message': 'Comment deleted successfully'})
+    except Exception as e:
+        app.logger.exception('Error deleting comment')
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/attachments/<int:attachment_id>', methods=['GET'])
 @login_required
 def download_attachment(attachment_id):
@@ -315,15 +489,31 @@ def download_attachment(attachment_id):
         att = db_manager.get_attachment(attachment_id)
         if not att:
             return jsonify({'error': 'Attachment not found'}), 404
-        # sqlite3.Row does not have .get(); convert to dict for safe access
+            
+        # 将结果转换为字典以便安全访问
         att_row = dict(att)
-        filepath = att_row.get('filepath')
-        if not filepath or not os.path.exists(filepath):
-            return jsonify({'error': 'File not found on server'}), 404
-        # Use send_file to serve the file
+        relative_path = att_row.get('filepath')
+        filename = att_row.get('filename')
+        
+        if not relative_path:
+            return jsonify({'error': 'Attachment path missing in database'}), 500
+        
         from flask import send_file
-        # Use download_name where available; provide filename from DB
-        return send_file(filepath, as_attachment=True, download_name=att_row.get('filename'))
+
+        # 将相对路径转换为绝对路径
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], relative_path)
+        
+        if not os.path.exists(filepath):
+            app.logger.error(f"Attachment file not found: {filepath}")
+            return jsonify({'error': 'File not found on server'}), 404
+            
+        # 使用 send_file 发送文件
+        return send_file(
+            filepath, 
+            as_attachment=True, 
+            download_name=filename
+        )
+        
     except Exception as e:
         app.logger.exception('Error downloading attachment')
         return jsonify({'error': str(e)}), 500

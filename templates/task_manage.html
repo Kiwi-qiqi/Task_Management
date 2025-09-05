@@ -190,13 +190,13 @@
                     <input type="hidden" id="taskId" name="id">
 
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Task Title</label>
                                 <input type="text" class="form-control" id="title" name="title" required>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Task Type</label>
                                 <select class="form-select" id="type" name="type">
@@ -208,6 +208,46 @@
                                     <option value="design">Design</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Assignee</label>
+                                <select class="form-select" id="assignee" name="assignee_id">
+                                    <!-- <option value="">Unassigned</option> -->
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Project</label>
+                                <select class="form-select" id="project" name="project_id" required>
+                                    <!-- Dynamically populated -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <div class="date-input-group">
+                                    <input type="date" class="form-control form-control-lg" id="start_date" name="start_date" required>
+                                    <span class="date-icon"><i class="far fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Due Date</label>
+                                <div class="date-input-group">
+                                    <input type="date" class="form-control form-control-lg" id="due_date" name="due_date" required>
+                                    <span class="date-icon"><i class="far fa-calendar"></i></span>
+                                </div>
                         </div>
                     </div>
 
@@ -248,41 +288,6 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Start Date</label>
-                                <input type="datetime-local" class="form-control" id="start_date" name="start_date">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Due Date</label>
-                                <input type="datetime-local" class="form-control" id="due_date" name="due_date">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Assignee</label>
-                                <select class="form-select" id="assignee" name="assignee_id">
-                                    <option value="">Unassigned</option>
-                                    <!-- Dynamically populated -->
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Project</label>
-                                <select class="form-select" id="project" name="project_id" required>
-                                    <!-- Dynamically populated -->
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="mb-3">
                         <label class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
@@ -290,7 +295,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelbtn">Cancel</button>
                 <button type="button" class="btn btn-primary" id="submitTaskForm">Save</button>
             </div>
         </div>
