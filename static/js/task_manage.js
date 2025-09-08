@@ -8,12 +8,12 @@ function initTaskManagement() {
     // ==================================================================
     // State
     // ==================================================================
-    let tasks = [];
-    let currentSortField = 'title';
+    let tasks                = [];
+    let currentSortField     = 'title';
     let currentSortDirection = 'asc';
-    let selectedTaskId = null;
-    let detailVisible = false;
-    let isEditing = false;
+    let selectedTaskId       = null;
+    let detailVisible        = false;
+    let isEditing            = false;
 
     // ==================================================================
     // Utilities
@@ -21,11 +21,11 @@ function initTaskManagement() {
     function formatDate(dateString) {
         if (!dateString) return 'Not set';
         try {
-            const date = new Date(dateString);
+            const date        = new Date(dateString);
             const beijingDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
-            const year = beijingDate.getUTCFullYear();
-            const month = String(beijingDate.getUTCMonth() + 1).padStart(2, '0');
-            const day = String(beijingDate.getUTCDate()).padStart(2, '0');
+            const year        = beijingDate.getUTCFullYear();
+            const month       = String(beijingDate.getUTCMonth() + 1).padStart(2, '0');
+            const day         = String(beijingDate.getUTCDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         } catch (e) {
             return 'Invalid date';
@@ -64,14 +64,15 @@ function initTaskManagement() {
         const dropdown = document.getElementById(elementId);
         if (!dropdown) return;
         
-        if (isAdmin) {
-            console.info("Admin")
+        if (isAdmin && elementId === 'assigneeFilter') {
+            dropdown.innerHTML = '';
+            // console.info("Admin")
             const allOption = document.createElement('option');
             allOption.value = 'all';
             allOption.textContent = 'All Assignees';
             dropdown.appendChild(allOption);
         } else {
-            console.info("Not admin")
+            // console.info("Not admin")
             if (elementId === 'assigneeFilter') {
                 dropdown.innerHTML = '';
             }
@@ -554,15 +555,15 @@ function initTaskManagement() {
                     const projectSelect = document.getElementById('project'); 
                     if (projectSelect) projectSelect.value = task.project?.id || '';
                     
-                    document.getElementById('start_date').value = formatDateTimeForInput(task.start_date);
-                    document.getElementById('due_date').value   = formatDateTimeForInput(task.due_date);
+                    document.getElementById('start_date').value = formatDate(task.start_date);
+                    document.getElementById('due_date').value   = formatDate(task.due_date);
                 })
                 .catch(handleError('Failed to load task details'));
         } else { 
             isEditing = false; 
             modalTitle.textContent = 'Create New Task'; 
             const today = new Date();
-            const formattedDate = formatDateTimeForInput(today.toISOString().split('T')[0]);  // 直接获取ISO日期
+            const formattedDate = formatDate(today.toISOString().split('T')[0]);  // 直接获取ISO日期
             document.getElementById('start_date').value = formattedDate;
             
         }

@@ -273,10 +273,10 @@ def create_database():
         
         # 从JSON文件加载数据
         categories_data = load_json_data('database_backup/categories.json')
-        users_data = load_json_data('database_backup/users.json')
-        projects_data = load_json_data('database_backup/projects.json')
-        tasks_data = load_json_data('database_backup/tasks.json')
-        comments_data = load_json_data('database_backup/comments.json')
+        users_data      = load_json_data('database_backup/users.json')
+        projects_data   = load_json_data('database_backup/projects.json')
+        tasks_data      = load_json_data('database_backup/tasks.json')
+        comments_data   = load_json_data('database_backup/comments.json')
         
         # 检查所有必需的数据文件是否存在
         if not all([categories_data, users_data, projects_data]):
