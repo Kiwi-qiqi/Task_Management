@@ -447,6 +447,9 @@ body {
 }
 
 .detail-value {
+    white-space: pre-wrap; /* 保留换行符和空格 */
+    word-wrap: break-word; /* 处理长单词换行 */
+    line-height: 1.4; /* 改善可读性 */
     flex: 1;
 }
 
@@ -494,7 +497,10 @@ body {
 }
 
 .comment-content {
-    line-height: 1.5;
+    white-space: pre-wrap; /* 保留换行符和空格 */
+    word-wrap: break-word; /* 处理长单词换行 */
+    line-height: 1.4; /* 改善可读性 */
+    margin-top: 10px; /* 与头部保持间距 */
 }
 
 .add-comment-form {

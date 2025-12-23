@@ -1,0 +1,159 @@
+{
+    "basicInfo": {
+        "configName": "test_prj",
+        "createdTime": "2025-09-29 13:54:19",
+        "updatedTime": "2025-09-29 17:17:47",
+        "description": "New project configuration"
+    },
+    "protocolConfigurations": {
+        "CAN": {
+            "protocolType": "CAN",
+            "protocolFilePath": "test_prj\\PMSM.dbc"
+        },
+        "CANFD": {
+            "protocolType": "CANFD",
+            "protocolFilePath": ""
+        },
+        "LIN": {
+            "protocolType": "LIN",
+            "protocolFilePath": ""
+        }
+    },
+    "hardwareConfigurations": {
+        "PCAN-USB Pro": {
+            "hardwareType": "PCAN-USB Pro",
+            "hardwareName": "PEAK USB CAN Interface",
+            "supportedProtocols": [
+                "CAN",
+                "CANFD",
+                "LIN"
+            ],
+            "protocolSettings": {
+                "CAN": {
+                    "baudRate": 500000,
+                    "samplingPoint": 80.0,
+                    "clockFrequency": 16000000
+                },
+                "CANFD": {
+                    "baudRate": 2000000,
+                    "samplingPoint": 75.0,
+                    "clockFrequency": 16000000,
+                    "dataBaudRate": 4000000
+                }
+            },
+            "channelConfig": {
+                "selectedChannels": 1,
+                "availableChannels": [
+                    1,
+                    2
+                ]
+            }
+        },
+        "ZLGCAN": {
+            "hardwareType": "ZLGCAN",
+            "hardwareName": "ZLGCAN Universal Interface",
+            "supportedProtocols": [
+                "CAN",
+                "CANFD",
+                "LIN"
+            ],
+            "protocolSettings": {
+                "CAN": {
+                    "baudRate": 500000,
+                    "samplingPoint": 80.0,
+                    "clockFrequency": 16000000
+                },
+                "CANFD": {
+                    "baudRate": 2000000,
+                    "samplingPoint": 75.0,
+                    "clockFrequency": 16000000,
+                    "dataBaudRate": 4000000
+                }
+            },
+            "channelConfig": {
+                "selectedChannels": 0,
+                "availableChannels": [
+                    0,
+                    1
+                ]
+            }
+        },
+        "TOOMOSS": {
+            "hardwareType": "TOOMOSS",
+            "hardwareName": "TOOMOSS Communication Interface",
+            "supportedProtocols": [
+                "CAN",
+                "LIN"
+            ],
+            "protocolSettings": {
+                "CAN": {
+                    "baudRate": 500000,
+                    "samplingPoint": 80.0,
+                    "clockFrequency": 16000000
+                },
+                "CANFD": {
+                    "baudRate": 2000000,
+                    "samplingPoint": 75.0,
+                    "clockFrequency": 16000000,
+                    "dataBaudRate": 4000000
+                }
+            },
+            "channelConfig": {
+                "selectedChannels": 1,
+                "availableChannels": [
+                    1,
+                    2
+                ]
+            }
+        },
+        "ELMOS": {
+            "hardwareType": "ELMOS",
+            "hardwareName": "ELMOS Automotive Interface",
+            "supportedProtocols": [
+                "CAN",
+                "CANFD"
+            ],
+            "protocolSettings": {
+                "CAN": {
+                    "baudRate": 500000,
+                    "samplingPoint": 80.0,
+                    "clockFrequency": 16000000
+                },
+                "CANFD": {
+                    "baudRate": 2000000,
+                    "samplingPoint": 75.0,
+                    "clockFrequency": 16000000,
+                    "dataBaudRate": 4000000
+                }
+            },
+            "channelConfig": {
+                "selectedChannels": 1,
+                "availableChannels": [
+                    1
+                ]
+            }
+        }
+    },
+    "traceSettings": {
+        "logRootPath": "/logs/Vehicle_Communication_Config/",
+        "maxSingleLogFileSize": "2MB",
+        "logRetentionPolicy": {
+            "maxLogFiles": 10,
+            "maxStorageDuration": "30 days"
+        },
+        "loggingConfiguration": {
+            "recordTimestamp": true,
+            "recordDirection": true,
+            "recordErrorFrames": true,
+            "compressionEnabled": true
+        }
+    },
+    "currentConfiguration": {
+        "selectedProtocol": "CAN",
+        "selectedHardware": "PCAN-USB Pro"
+    },
+    "window_geometry": {
+        "width": 1528,
+        "height": 800
+    }
+}

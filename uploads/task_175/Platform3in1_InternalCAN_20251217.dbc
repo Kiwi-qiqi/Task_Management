@@ -1,0 +1,444 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: CDU Compressor Null PROG_TOOL Sniffer
+
+
+BO_ 1504 EAC_Status: 8 Compressor
+ SG_ EAC_Motor_Speed : 0|12@1+ (10,0) [0|20000] "Rpm"  CDU,Sniffer
+ SG_ EAC_HVDC_Volt : 12|8@1+ (5,0) [0|1000] "V"  CDU,Sniffer
+ SG_ EAC_HVDC_Curr : 20|8@1+ (0.5,-50) [-50|70] "A"  CDU,Sniffer
+ SG_ EAC_Invt_Temp : 28|8@1+ (1,-50) [-50|200] "C"  CDU,Sniffer
+ SG_ EAC_Invt_Curr : 36|8@1+ (0.5,0) [0|120] "A"  CDU,Sniffer
+ SG_ EAC_Run_Status : 44|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ EAC_Fault_Level : 48|3@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ EAC_Status_RollingCounter : 52|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ EAC_Status_Checksum : 56|8@1+ (1,0) [0|255] ""  CDU,Sniffer
+
+BO_ 1760 EAC_Fault: 8 Compressor
+ SG_ EAC_HW_Flt_Invt_Curr_OC : 0|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_HW_Flt_Drv_Volt_UV : 1|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_HW_Flt_KL30_Volt : 2|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_HVDC_Volt_OV : 3|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_HVDC_Volt_UV : 4|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_HVDC_Volt_Plaus : 5|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_HVDC_Curr_OC : 6|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Invt_Curr_OC : 7|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Curr_Offs : 8|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Zero_Curr_OC : 9|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Drv_Volt_UV : 10|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Invt_Temp_OT : 11|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Invt_Temp_UT : 12|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Invt_Temp_Plaus : 13|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Invt_IGBT_Open : 14|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Motor_Phase_Loss : 15|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Motor_Speed_OL : 16|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Motor_Speed_UL : 17|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Motor_No_Load : 18|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Motor_Stall : 19|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Ctrl_Integ_OL : 20|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Act_Disch : 21|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Checksum_Error : 48|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Rollingcounter_Error : 49|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_SW_Flt_Framelost_Error : 50|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ EAC_Fault_RollingCounter : 52|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ EAC_Fault_Checksum : 56|8@1+ (1,0) [0|255] ""  CDU,Sniffer
+
+BO_ 1520 VCU_EAC_Command: 4 CDU
+ SG_ VCU_EAC_Spd_Target : 0|16@1+ (1,0) [0|20000] "Rpm"  Compressor,Sniffer
+ SG_ VCU_EAC_Flt_Clear_Request : 16|2@1+ (1,0) [0|0] ""  Compressor,Sniffer
+ SG_ VCU_EAC_On_Request : 18|2@1+ (1,0) [0|0] ""  Compressor,Sniffer
+ SG_ VCU_EAC_Checksum_Tosend : 24|8@1+ (1,0) [0|255] ""  Compressor,Sniffer
+
+BO_ 1505 PTC_Status: 8 Compressor
+ SG_ PTC_Outlet_Temp : 0|8@1+ (1,-50) [-50|200] "C"  CDU,Sniffer
+ SG_ PTC_Heater_Temp : 8|8@1+ (1,-50) [-50|200] "C"  CDU,Sniffer
+ SG_ PTC_HVDC_Pwr : 16|8@1+ (50,0) [0|12750] "W"  CDU,Sniffer
+ SG_ PTC_HVDC_Volt : 24|8@1+ (5,0) [0|1000] "V"  CDU,Sniffer
+ SG_ PTC_HVDC_Curr : 32|8@1+ (0.5,0) [0|120] "A"  CDU,Sniffer
+ SG_ PTC_Work_Status : 40|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ PTC_Fault_Level : 44|3@1+ (1,0) [0|7] ""  CDU,Sniffer
+ SG_ PTC_Status_RollingCounter : 52|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ PTC_Status_Checksum : 56|8@1+ (1,0) [0|255] ""  CDU,Sniffer
+
+BO_ 1761 PTC_Fault: 8 Compressor
+ SG_ PTC_HW_Flt_Heater_Curr_OC : 0|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_HW_Flt_Drv_Volt_UV : 1|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_HW_Flt_KL30_Volt : 2|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_HVDC_Volt_OV : 3|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_HVDC_Volt_UV : 4|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_HVDC_Volt_Plaus : 5|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_HVDC_Curr_OC : 6|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Curr_Offs : 7|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Drv_Volt_UV : 8|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_IGBT_Temp_OT : 9|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_IGBT_Temp_UT : 10|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_IGBT_Temp_Plaus : 11|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Inlet_Temp_OT : 12|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Inlet_Temp_UT : 13|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Outlet_Temp_OT : 14|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Outlet_Temp_UT : 15|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Inoutlet_Temp_Plaus : 16|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Heater_Temp_OT : 17|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_IGBT_Short : 18|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Heater_Short : 19|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Road_Open : 20|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Heater_Dry : 21|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Checksum_Error : 48|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Rollingcounter_Error : 49|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_SW_Flt_Framelost_Error : 50|1@1+ (1,0) [0|1] ""  CDU,Sniffer
+ SG_ PTC_Fault_RollingCounter : 52|4@1+ (1,0) [0|15] ""  CDU,Sniffer
+ SG_ PTC_Fault_Checksum : 56|8@1+ (1,0) [0|255] ""  CDU,Sniffer
+
+BO_ 1521 VCU_PTC_Command: 4 CDU
+ SG_ VCU_PTC_Power_Target : 0|8@1+ (50,0) [0|12750] "W"  Compressor,Sniffer
+ SG_ VCU_PTC_OutTemp_Limit : 8|8@1+ (1,-50) [-40|90] "℃"  Compressor,Sniffer
+ SG_ VCU_PTC_Flt_Clear_Request : 16|2@1+ (1,0) [0|0] ""  Compressor,Sniffer
+ SG_ VCU_PTC_On_Request : 18|2@1+ (1,0) [0|0] ""  Compressor,Sniffer
+ SG_ VCU_PTC_Checksum_Tosend : 24|8@1+ (1,0) [0|255] ""  Compressor,Sniffer
+
+BO_ 513 EAC_Debug: 8 Compressor
+ SG_ EAC_Debug1 : 0|16@1- (1,0) [-32768|32767] ""  CDU,Sniffer
+ SG_ EAC_Debug2 : 16|16@1- (1,0) [-32768|32767] ""  CDU,Sniffer
+ SG_ EAC_Debug3 : 32|16@1- (1,0) [-32768|32767] ""  CDU,Sniffer
+ SG_ EAC_Debug4 : 48|16@1- (1,0) [-32768|32767] ""  CDU,Sniffer
+
+BO_ 1888 UDS_EAC_Request: 8 CDU
+ SG_ UDS_Request : 0|64@1+ (1,0) [0|0] ""  Compressor,Sniffer
+
+BO_ 1798 UDS_EAC_Response: 8 Compressor
+ SG_ UDS_Response : 0|64@1+ (1,0) [0|0] ""  CDU,PROG_TOOL,Sniffer
+
+
+
+CM_ "Version: 
+Date: ";
+CM_ SG_ 1504 EAC_Invt_Curr "Average value of inverter three phase current RMS value.";
+CM_ SG_ 1760 EAC_HW_Flt_KL30_Volt "Logic OR of KL30 voltage UV and KL30 voltage OV.";
+CM_ SG_ 1760 EAC_SW_Flt_Curr_Offs "Logic OR of inverter three current sensor offset and HVDC current sensor offset.";
+CM_ SG_ 1760 EAC_SW_Flt_Invt_Temp_OT "Logic OR of all inverter temperature over temperature fault.";
+CM_ SG_ 1760 EAC_SW_Flt_Invt_Temp_UT "Logic OR of all inverter temperature under temperature fault.";
+CM_ SG_ 1760 EAC_SW_Flt_Invt_Temp_Plaus "Logic OR of all inverter temperature sensor plausibility fault.";
+CM_ SG_ 1760 EAC_SW_Flt_Motor_Speed_OL "Speed over limit fault.";
+CM_ SG_ 1760 EAC_SW_Flt_Motor_Speed_UL "Speed under limit fault.";
+CM_ SG_ 1760 EAC_SW_Flt_Ctrl_Integ_OL "Motor control loop integrator over limit.";
+CM_ SG_ 1761 PTC_HW_Flt_KL30_Volt "Logic OR of KL30 voltage UV and KL30 voltage OV.";
+CM_ SG_ 1761 PTC_SW_Flt_IGBT_Temp_OT "Logic OR of all IGBT temperature over temperature fault.";
+CM_ SG_ 1761 PTC_SW_Flt_IGBT_Temp_UT "Logic OR of all IGBT temperature under temperature fault.";
+BA_DEF_ BO_  "E2eProfiling" ENUM  "None","MahleP1","PsaP1","PsaP2","PsaP3","PsaP4","PsaP5";
+BA_DEF_ SG_  "E2eProtected" ENUM  "no","yes";
+BA_DEF_ BO_  "E2eChecksumIniConst" INT 0 15;
+BA_DEF_ BO_  "DiagFdOnly" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagConnection" INT 0 65535;
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ SG_  "GenSigTimeoutTime_OBC_DCDC" INT 0 65535;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 255;
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 65535;
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 2147483647;
+BA_DEF_ SG_  "GenSigStartValue" INT 0 2147483647;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 65535;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","NotUsed","NotUsed","NoSigSendType";
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NoMsgSendType";
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BO_  "Baudrate" INT 0 1000000;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "E2eProfiling" "None";
+BA_DEF_DEF_  "E2eProtected" "no";
+BA_DEF_DEF_  "E2eChecksumIniConst" 0;
+BA_DEF_DEF_  "DiagFdOnly" "No";
+BA_DEF_DEF_  "DiagConnection" 0;
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "GenSigTimeoutTime_OBC_DCDC" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "GenSigSendType" "NoSigSendType";
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "DBName" "Int_CAN";
+BA_DEF_DEF_  "Manufacturer" "Vector";
+BA_DEF_DEF_  "Baudrate" 1000000;
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_ "BusType" "CAN";
+BA_ "DBName" "Int_CAN";
+BA_ "DiagResponse" BO_ 1504 0;
+BA_ "DiagRequest" BO_ 1504 0;
+BA_ "GenMsgStartDelayTime" BO_ 1504 1;
+BA_ "GenMsgSendType" BO_ 1504 0;
+BA_ "GenMsgILSupport" BO_ 1504 1;
+BA_ "GenMsgCycleTime" BO_ 1504 100;
+BA_ "DiagResponse" BO_ 1760 0;
+BA_ "DiagRequest" BO_ 1760 0;
+BA_ "GenMsgStartDelayTime" BO_ 1760 2;
+BA_ "GenMsgSendType" BO_ 1760 0;
+BA_ "GenMsgILSupport" BO_ 1760 1;
+BA_ "GenMsgCycleTime" BO_ 1760 100;
+BA_ "DiagResponse" BO_ 1520 0;
+BA_ "DiagRequest" BO_ 1520 0;
+BA_ "GenMsgStartDelayTime" BO_ 1520 0;
+BA_ "GenMsgSendType" BO_ 1520 0;
+BA_ "GenMsgILSupport" BO_ 1520 1;
+BA_ "GenMsgCycleTime" BO_ 1520 100;
+BA_ "DiagResponse" BO_ 1505 0;
+BA_ "DiagRequest" BO_ 1505 0;
+BA_ "GenMsgStartDelayTime" BO_ 1505 4;
+BA_ "GenMsgSendType" BO_ 1505 0;
+BA_ "GenMsgILSupport" BO_ 1505 1;
+BA_ "GenMsgCycleTime" BO_ 1505 100;
+BA_ "DiagResponse" BO_ 1761 0;
+BA_ "DiagRequest" BO_ 1761 0;
+BA_ "GenMsgStartDelayTime" BO_ 1761 5;
+BA_ "GenMsgSendType" BO_ 1761 0;
+BA_ "GenMsgILSupport" BO_ 1761 1;
+BA_ "GenMsgCycleTime" BO_ 1761 100;
+BA_ "DiagResponse" BO_ 1521 0;
+BA_ "DiagRequest" BO_ 1521 0;
+BA_ "GenMsgStartDelayTime" BO_ 1521 3;
+BA_ "GenMsgSendType" BO_ 1521 0;
+BA_ "GenMsgILSupport" BO_ 1521 1;
+BA_ "GenMsgCycleTime" BO_ 1521 100;
+BA_ "DiagResponse" BO_ 513 0;
+BA_ "DiagRequest" BO_ 513 0;
+BA_ "GenMsgStartDelayTime" BO_ 513 50;
+BA_ "GenMsgSendType" BO_ 513 0;
+BA_ "GenMsgILSupport" BO_ 513 1;
+BA_ "GenMsgCycleTime" BO_ 513 1;
+BA_ "DiagResponse" BO_ 1888 0;
+BA_ "DiagRequest" BO_ 1888 0;
+BA_ "GenMsgSendType" BO_ 1888 8;
+BA_ "GenMsgILSupport" BO_ 1888 1;
+BA_ "GenMsgStartDelayTime" BO_ 1888 0;
+BA_ "GenMsgCycleTime" BO_ 1888 0;
+BA_ "DiagResponse" BO_ 1798 0;
+BA_ "DiagRequest" BO_ 1798 0;
+BA_ "GenMsgSendType" BO_ 1798 8;
+BA_ "GenMsgILSupport" BO_ 1798 1;
+BA_ "GenMsgStartDelayTime" BO_ 1798 0;
+BA_ "GenMsgCycleTime" BO_ 1798 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_Motor_Speed 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Motor_Speed 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_HVDC_Volt 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_HVDC_Volt 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_HVDC_Curr 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_HVDC_Curr 100;
+BA_ "GenSigSendType" SG_ 1504 EAC_Invt_Temp 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Invt_Temp 50;
+BA_ "GenSigSendType" SG_ 1504 EAC_Invt_Curr 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Invt_Curr 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_Run_Status 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Run_Status 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_Fault_Level 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Fault_Level 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_Status_RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Status_RollingCounter 0;
+BA_ "GenSigSendType" SG_ 1504 EAC_Status_Checksum 0;
+BA_ "GenSigStartValue" SG_ 1504 EAC_Status_Checksum 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_HW_Flt_Invt_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_HW_Flt_Invt_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_HW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_HW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_HW_Flt_KL30_Volt 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_HW_Flt_KL30_Volt 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_HVDC_Volt_OV 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_HVDC_Volt_OV 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_HVDC_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_HVDC_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_HVDC_Volt_Plaus 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_HVDC_Volt_Plaus 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_HVDC_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_HVDC_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Invt_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Invt_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Curr_Offs 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Curr_Offs 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Zero_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Zero_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Invt_Temp_OT 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Invt_Temp_OT 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Invt_Temp_UT 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Invt_Temp_UT 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Invt_Temp_Plaus 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Invt_Temp_Plaus 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Invt_IGBT_Open 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Invt_IGBT_Open 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Motor_Phase_Loss 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Motor_Phase_Loss 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Motor_Speed_OL 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Motor_Speed_OL 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Motor_Speed_UL 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Motor_Speed_UL 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Motor_No_Load 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Motor_No_Load 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Motor_Stall 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Motor_Stall 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Ctrl_Integ_OL 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Ctrl_Integ_OL 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Act_Disch 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Act_Disch 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Checksum_Error 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Checksum_Error 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Rollingcounter_Error 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Rollingcounter_Error 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_SW_Flt_Framelost_Error 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_SW_Flt_Framelost_Error 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_Fault_RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_Fault_RollingCounter 0;
+BA_ "GenSigSendType" SG_ 1760 EAC_Fault_Checksum 0;
+BA_ "GenSigStartValue" SG_ 1760 EAC_Fault_Checksum 0;
+BA_ "GenSigSendType" SG_ 1520 VCU_EAC_Spd_Target 0;
+BA_ "GenSigStartValue" SG_ 1520 VCU_EAC_Spd_Target 0;
+BA_ "GenSigSendType" SG_ 1520 VCU_EAC_Flt_Clear_Request 0;
+BA_ "GenSigStartValue" SG_ 1520 VCU_EAC_Flt_Clear_Request 0;
+BA_ "GenSigSendType" SG_ 1520 VCU_EAC_On_Request 0;
+BA_ "GenSigStartValue" SG_ 1520 VCU_EAC_On_Request 0;
+BA_ "GenSigSendType" SG_ 1520 VCU_EAC_Checksum_Tosend 0;
+BA_ "GenSigStartValue" SG_ 1520 VCU_EAC_Checksum_Tosend 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_Outlet_Temp 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Outlet_Temp 50;
+BA_ "GenSigSendType" SG_ 1505 PTC_Heater_Temp 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Heater_Temp 50;
+BA_ "GenSigSendType" SG_ 1505 PTC_HVDC_Pwr 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_HVDC_Pwr 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_HVDC_Volt 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_HVDC_Volt 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_HVDC_Curr 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_HVDC_Curr 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_Work_Status 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Work_Status 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_Fault_Level 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Fault_Level 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_Status_RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Status_RollingCounter 0;
+BA_ "GenSigSendType" SG_ 1505 PTC_Status_Checksum 0;
+BA_ "GenSigStartValue" SG_ 1505 PTC_Status_Checksum 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_HW_Flt_Heater_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_HW_Flt_Heater_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_HW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_HW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_HW_Flt_KL30_Volt 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_HW_Flt_KL30_Volt 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_HVDC_Volt_OV 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_HVDC_Volt_OV 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_HVDC_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_HVDC_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_HVDC_Volt_Plaus 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_HVDC_Volt_Plaus 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_HVDC_Curr_OC 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_HVDC_Curr_OC 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Curr_Offs 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Curr_Offs 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Drv_Volt_UV 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_IGBT_Temp_OT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_IGBT_Temp_OT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_IGBT_Temp_UT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_IGBT_Temp_UT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_IGBT_Temp_Plaus 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_IGBT_Temp_Plaus 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Inlet_Temp_OT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Inlet_Temp_OT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Inlet_Temp_UT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Inlet_Temp_UT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Outlet_Temp_OT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Outlet_Temp_OT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Outlet_Temp_UT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Outlet_Temp_UT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Inoutlet_Temp_Plaus 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Inoutlet_Temp_Plaus 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Heater_Temp_OT 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Heater_Temp_OT 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_IGBT_Short 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_IGBT_Short 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Heater_Short 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Heater_Short 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Road_Open 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Road_Open 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Heater_Dry 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Heater_Dry 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Checksum_Error 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Checksum_Error 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Rollingcounter_Error 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Rollingcounter_Error 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_SW_Flt_Framelost_Error 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_SW_Flt_Framelost_Error 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_Fault_RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_Fault_RollingCounter 0;
+BA_ "GenSigSendType" SG_ 1761 PTC_Fault_Checksum 0;
+BA_ "GenSigStartValue" SG_ 1761 PTC_Fault_Checksum 0;
+BA_ "GenSigSendType" SG_ 1521 VCU_PTC_Power_Target 0;
+BA_ "GenSigStartValue" SG_ 1521 VCU_PTC_Power_Target 0;
+BA_ "GenSigSendType" SG_ 1521 VCU_PTC_OutTemp_Limit 0;
+BA_ "GenSigStartValue" SG_ 1521 VCU_PTC_OutTemp_Limit 50;
+BA_ "GenSigSendType" SG_ 1521 VCU_PTC_Flt_Clear_Request 0;
+BA_ "GenSigStartValue" SG_ 1521 VCU_PTC_Flt_Clear_Request 0;
+BA_ "GenSigSendType" SG_ 1521 VCU_PTC_On_Request 0;
+BA_ "GenSigStartValue" SG_ 1521 VCU_PTC_On_Request 0;
+BA_ "GenSigSendType" SG_ 1521 VCU_PTC_Checksum_Tosend 0;
+BA_ "GenSigStartValue" SG_ 1521 VCU_PTC_Checksum_Tosend 0;
+BA_ "GenSigSendType" SG_ 513 EAC_Debug1 0;
+BA_ "GenSigStartValue" SG_ 513 EAC_Debug1 0;
+BA_ "GenSigSendType" SG_ 513 EAC_Debug2 0;
+BA_ "GenSigStartValue" SG_ 513 EAC_Debug2 0;
+BA_ "GenSigSendType" SG_ 513 EAC_Debug3 0;
+BA_ "GenSigStartValue" SG_ 513 EAC_Debug3 0;
+BA_ "GenSigSendType" SG_ 513 EAC_Debug4 0;
+BA_ "GenSigStartValue" SG_ 513 EAC_Debug4 0;
+BA_ "GenSigSendType" SG_ 1888 UDS_Request 1;
+BA_ "GenSigStartValue" SG_ 1888 UDS_Request 0;
+BA_ "GenSigSendType" SG_ 1798 UDS_Response 1;
+BA_ "GenSigStartValue" SG_ 1798 UDS_Response 0;
+VAL_ 1504 EAC_Run_Status 15 "DIR_PWM" 14 "DIR_SVPWM" 13 "UNDEFINE" 12 "ACT_DISCHG" 11 "CAL" 10 "ALIGN" 9 "IF" 8 "VF" 7 "UNDEFINE" 6 "UNDEFINE" 5 "UNDEFINE" 4 "ERROR" 3 "NM_RU" 2 "NM_START" 1 "NM_ALIGN" 0 "STOPPED" ;
+VAL_ 1504 EAC_Fault_Level 3 "Level3" 2 "Level2" 1 "Level1" 0 "Level0" ;
+VAL_ 1520 VCU_EAC_Flt_Clear_Request 1 "ENABLE" 0 "DISABLE" ;
+VAL_ 1520 VCU_EAC_On_Request 1 "ON" 0 "OFF" ;
+VAL_ 1505 PTC_Work_Status 15 "UNDEFINE" 14 "UNDEFINE" 13 "UNDEFINE" 12 "UNDEFINE" 11 "UNDEFINE" 10 "UNDEFINE" 9 "UNDEFINE" 8 "UNDEFINE" 7 "UNDEFINE" 6 "UNDEFINE" 5 "UNDEFINE" 4 "ERROR" 3 "UNDEFINE" 2 "DERATING" 1 "HEATINT" 0 "OFF" ;
+VAL_ 1505 PTC_Fault_Level 3 "Level3" 2 "Level2" 1 "Level1" 0 "Level0" ;
+VAL_ 1521 VCU_PTC_Flt_Clear_Request 1 "ENABLE" 0 "DISABLE" ;
+VAL_ 1521 VCU_PTC_On_Request 1 "ON" 0 "OFF" ;
+

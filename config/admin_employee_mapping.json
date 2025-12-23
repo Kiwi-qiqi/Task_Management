@@ -1,0 +1,13 @@
+{
+  "admin_employee_mapping": {
+    "M0187437": ["M0225920", "M0074028", "M0194858"],
+    "M0189672": ["M0225919", "M0175276"],
+    "M0199528": ["M0211232"]
+  },
+  "description": {
+    "M0187437": "Alex Zhu :  Xin Guo, Jordan Zhou and Min Xiong",
+    "M0189672": "Jason Zhang :  Mingyu Ma and Alex Li",
+    "M0199528": "Feihao Liu :  Junhu Li"
+  },
+  "last_updated": "2025-11-10"
+}

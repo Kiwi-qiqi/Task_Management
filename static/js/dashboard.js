@@ -38,16 +38,16 @@ function initDashboard() {
     // 获取统计数据
     async function fetchStats() {
         try {
-            const [totalProjects, totalTasks, activeProjects, delayedTasks] = await Promise.all([
+            const [totalProjects, totalTasks, activeTasks, delayedTasks] = await Promise.all([
                 fetchStat('/api/dashboard/total-projects', 'total'),
                 fetchStat('/api/dashboard/total-tasks', 'total'),
-                fetchStat('/api/dashboard/active-projects', 'active'),
+                fetchStat('/api/dashboard/active-tasks', 'active'),
                 fetchStat('/api/dashboard/delayed-tasks', 'delayed')
             ]);
             
             document.getElementById('totalProjects').textContent = totalProjects;
             document.getElementById('totalTasks').textContent = totalTasks;
-            document.getElementById('activeProjects').textContent = activeProjects;
+            document.getElementById('activeTasks').textContent = activeTasks;
             document.getElementById('delayedTasks').textContent = delayedTasks;
         } catch (error) {
             console.error('Failed to fetch stats:', error);

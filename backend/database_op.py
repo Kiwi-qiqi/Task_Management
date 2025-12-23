@@ -117,7 +117,7 @@ def add_project(cursor, project_data):
         project_data.get('end_date', None),
         project_data.get('main_rd', None),
         project_data.get('supplier', None),
-        project_data['category_id']
+        1
     )
     cursor.execute(query, params)
     return cursor.lastrowid
@@ -222,12 +222,43 @@ def project_operations(cursor):
 
 
 if __name__ == "__main__":
-    # 连接数据库（示例）
+#     # 连接数据库（示例）
     import sqlite3
     conn = sqlite3.connect('databases/taskmanager.db')
     cursor = conn.cursor()
-
     
+    
+#     ############################### Add Project #####################################
+#     new_project = {
+#         'name': 'Test prj',
+#     }
+#     add_project(cursor, new_project)
+#     #################################################################################
+    
+    # new_user = {
+    #     'userID'       : 'M0211232',
+    #     'username'     : 'junhu.li',
+    #     'email'        : 'junhu.li@mahle.com',
+    #     'password_hash': 'Mahle0211232@97',
+    #     'role'         : 'employee',
+    #     'full_name'    : 'Junhu Li',
+    #     'site'         : 'MATS',
+    #     'competency'   : 'SW',
+    #     'title'        : 'SW',
+    #     'mobile'       : '00000000000'
+    # }
+    # add_user(cursor, new_user)
+
+    project_list = [
+        "ECP__GEN2 internal development",
+        "48V Watter Pump platform development",
+        "800V45CC Ecompressor platform development",
+        "ECP_MAN/SCANIA_Truck Pump can通讯调试",
+        "PTC测试上位机开发",
+        "fan风扇测试上位机开发"
+    ]
+    for prj in project_list:
+        delete_project(cursor, prj)
 
     # 提交事务
     conn.commit()

@@ -76,6 +76,7 @@
                                 <th data-sort="priority">Priority</th>
                                 <th data-sort="status">Status</th>
                                 <th data-sort="due_date">Due Date</th>
+                                <th data="Actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="tasksTableBody">
@@ -140,10 +141,10 @@
                         <div class="detail-label">Project:</div>
                         <div class="detail-value" id="taskDetailProject">Project Name</div>
                     </div>
-                    <div class="detail-item">
+                    <!-- <div class="detail-item">
                         <div class="detail-label">Category:</div>
                         <div class="detail-value" id="taskDetailCategory">Category</div>
-                    </div>
+                    </div> -->
                     <div class="detail-item">
                         <div class="detail-label">Assignee:</div>
                         <div class="detail-value" id="taskDetailAssignee">Assignee Name</div>
@@ -215,7 +216,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Assignee</label>
+                                <label for="assignee" class="form-label">Assignee</label>
                                 <select class="form-select" id="assignee" name="assignee_id">
                                     <!-- <option value="">Unassigned</option> -->
                                     <!-- Dynamically populated -->
@@ -224,9 +225,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Project</label>
+                                <label for="project" class="form-label">Project <span class="text-danger">*</span></label>
                                 <select class="form-select" id="project" name="project_id" required>
-                                    <!-- Dynamically populated -->
+                                    <!-- 选项将由JavaScript动态填充 -->
                                 </select>
                             </div>
                         </div>
